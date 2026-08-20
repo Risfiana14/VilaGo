@@ -3,63 +3,55 @@
 namespace App\Http\Controllers;
 
 use App\Models\Booking;
+use App\Models\Villa;
 use Illuminate\Http\Request;
 
 class BookingController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $bookings = Booking::with('villa')->latest()->get();
+        return view('bookings.index', compact('bookings'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        $villas = Villa::where('status', 'available')->get();
+        return view('bookings.create', compact('villas'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'villa_id'       => 'required|exists:villas,id',
+            'customer_name'  => 'required|string',
+            'customer_phone' => 'required|string',
+            'check_in'       => 'required|date',
+            'check_out'      => 'required|date|after:check_in',
+            'total_price'    => 'required|numeric',
+        ]);
+
+        Booking::create([
+            'villa_id'       => $request->villa_id,
+            'customer_name'  => $request->customer_name,
+            'customer_phone' => $request->customer_phone,
+            'check_in'       => $request->check_in,
+            'check_out'      => $request->check_out,
+            'total_price'    => $request->total_price,
+            'status'         => 'pending',
+        ]);
+
+        return redirect()->route('bookings.index')->with('success', 'Reservasi berhasil dibuat!');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Booking $booking)
+    public function updateStatus(Request $request, Booking $booking)
     {
-        //
-    }
+        $request->validate([
+            'status' => 'required|in:pending,confirmed,completed,cancelled'
+        ]);
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Booking $booking)
-    {
-        //
-    }
+        $booking->update(['status' => $request->status]);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Booking $booking)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Booking $booking)
-    {
-        //
+        return redirect()->back()->with('success', 'Status reservasi berhasil diperbarui!');
     }
 }

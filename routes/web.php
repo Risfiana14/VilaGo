@@ -2,9 +2,9 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\VillaController;
+use App\Http\Controllers\BookingController;
 
-// Route untuk halaman utama / dashboard
 Route::get('/', [VillaController::class, 'index'])->name('home');
-
-// Route resource otomatis mendaftarkan villas.index, villas.create, villas.store, dll.
 Route::resource('villas', VillaController::class);
+Route::resource('bookings', BookingController::class);
+Route::patch('bookings/{booking}/status', [BookingController::class, 'updateStatus'])->name('bookings.updateStatus');

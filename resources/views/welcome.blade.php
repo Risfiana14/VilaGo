@@ -36,7 +36,7 @@
           <span class="nav-icon"><i class="bi bi-building-add" aria-hidden="true"></i></span>
           <span class="nav-text">Tambah Vila</span>
         </a>
-        <a class="nav-link" href="#">
+        <a class="nav-link" href="{{ route('bookings.index') }}">
           <span class="nav-icon"><i class="bi bi-journal-check" aria-hidden="true"></i></span>
           <span class="nav-text">Reservasi / Booking</span>
         </a>
