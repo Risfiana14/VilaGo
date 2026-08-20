@@ -18,7 +18,7 @@ return new class extends Migration
             $table->text('description');
             $table->decimal('price_per_night', 12, 2);
             $table->integer('capacity');
-            $table->string('address');
+            $table->string('address')->nullable();
             $table->string('image')->nullable();
             $table->enum('status', ['available', 'booked', 'maintenance'])->default('available');
             $table->timestamps();
