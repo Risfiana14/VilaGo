@@ -3,16 +3,38 @@
 namespace App\Http\Controllers;
 
 use App\Models\Villa;
+use App\Models\Booking; // Import Model Booking
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class VillaController extends Controller
 {
-    // Fungsi ini yang tadi hilang/belum ada
-    public function index()
+    public function index(Request $request)
     {
-        $villas = Villa::latest()->get();
-        return view('welcome', compact('villas'));
+        $query = Villa::query();
+
+        // Filter berdasarkan kata kunci nama / lokasi
+        if ($request->filled('search')) {
+            $query->where(function($q) use ($request) {
+                $q->where('title', 'like', '%' . $request->search . '%')
+                ->orWhere('location', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        // Filter berdasarkan status vila
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $villas = $query->latest()->get();
+
+        // Hitung statistik
+        $totalVillas = Villa::count();
+        $availableVillas = Villa::where('status', 'available')->count();
+        $activeBookings = Booking::whereIn('status', ['pending', 'confirmed'])->count();
+        $totalRevenue = Booking::where('status', 'completed')->sum('total_price');
+
+        return view('welcome', compact('villas', 'totalVillas', 'availableVillas', 'activeBookings', 'totalRevenue'));
     }
 
     public function create()
@@ -23,24 +45,24 @@ class VillaController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'title' => 'required',
-            'location' => 'required',
-            'address' => 'required',
+            'title'           => 'required',
+            'location'        => 'required',
+            'address'         => 'required',
             'price_per_night' => 'required|numeric',
-            'capacity' => 'required|numeric',
-            'description' => 'required',
-            'status' => 'required|in:available,booked,maintenance',
+            'capacity'        => 'required|numeric',
+            'description'     => 'required',
+            'status'          => 'required|in:available,booked,maintenance',
         ]);
 
         Villa::create([
-            'title' => $request->title,
-            'slug' => Str::slug($request->title),
-            'location' => $request->location,
-            'address' => 'required',
+            'title'           => $request->title,
+            'slug'            => Str::slug($request->title),
+            'location'        => $request->location,
+            'address'         => $request->address,
             'price_per_night' => $request->price_per_night,
-            'capacity' => $request->capacity,
-            'description' => $request->description,
-            'status' => $request->status,
+            'capacity'        => $request->capacity,
+            'description'     => $request->description,
+            'status'          => $request->status,
         ]);
 
         return redirect()->route('home')->with('success', 'Vila berhasil ditambahkan!');
@@ -54,24 +76,24 @@ class VillaController extends Controller
     public function update(Request $request, Villa $villa)
     {
         $request->validate([
-            'title' => 'required',
-            'location' => 'required',
-            'address' => 'required',
+            'title'           => 'required',
+            'location'        => 'required',
+            'address'         => 'required',
             'price_per_night' => 'required|numeric',
-            'capacity' => 'required|numeric',
-            'description' => 'required',
-            'status'=> 'required|in:available,booked,maintenance',
+            'capacity'        => 'required|numeric',
+            'description'     => 'required',
+            'status'          => 'required|in:available,booked,maintenance',
         ]);
 
         $villa->update([
-            'title' => $request->title,
-            'slug' => Str::slug($request->title),
-            'location' => $request->location,
-            'address' => 'required',
+            'title'           => $request->title,
+            'slug'            => Str::slug($request->title),
+            'location'        => $request->location,
+            'address'         => $request->address,
             'price_per_night' => $request->price_per_night,
-            'capacity' => $request->capacity,
-            'description' => $request->description,
-            'status' => $request->status,
+            'capacity'        => $request->capacity,
+            'description'     => $request->description,
+            'status'          => $request->status,
         ]);
 
         return redirect()->route('home')->with('success', 'Data vila berhasil diperbarui!');

@@ -126,7 +126,7 @@
 
           <!-- Alert Notifikasi Sukses -->
           @if(session('success'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
               <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
               <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
@@ -147,6 +147,7 @@
             </div>
           </div>
 
+          <!-- Section Metrics / Card Ringkasan Dinamis -->
           <section class="row g-3 mt-1" aria-label="Dashboard metrics">
             <div class="col-12 col-sm-6 col-xl-3">
               <article class="metric-card metric-primary">
@@ -154,10 +155,9 @@
                   <span class="metric-label">Total Pendapatan</span>
                   <span class="metric-icon"><i class="bi bi-wallet2" aria-hidden="true"></i></span>
                 </div>
-                <div class="metric-value">Rp 48.240.000</div>
+                <div class="metric-value">Rp {{ number_format($totalRevenue ?? 0, 0, ',', '.') }}</div>
                 <div class="metric-meta">
-                  <span class="text-success">+12.5%</span>
-                  <span>dibanding bulan lalu</span>
+                  <span class="text-success">Transaksi Selesai</span>
                 </div>
               </article>
             </div>
@@ -165,24 +165,10 @@
             <div class="col-12 col-sm-6 col-xl-3">
               <article class="metric-card metric-success">
                 <div class="metric-top">
-                  <span class="metric-label">Total Reservasi</span>
-                  <span class="metric-icon"><i class="bi bi-journal-check" aria-hidden="true"></i></span>
+                  <span class="metric-label">Vila Tersedia</span>
+                  <span class="metric-icon"><i class="bi bi-building-check" aria-hidden="true"></i></span>
                 </div>
-                <div class="metric-value">1.284</div>
-                <div class="metric-meta">
-                  <span class="text-success">+8.2%</span>
-                  <span>pesanan baru</span>
-                </div>
-              </article>
-            </div>
-
-            <div class="col-12 col-sm-6 col-xl-3">
-              <article class="metric-card metric-warning">
-                <div class="metric-top">
-                  <span class="metric-label">Unit Vila Aktif</span>
-                  <span class="metric-icon"><i class="bi bi-building" aria-hidden="true"></i></span>
-                </div>
-                <div class="metric-value">{{ $villas->count() }} Unit</div>
+                <div class="metric-value">{{ $availableVillas ?? 0 }} Unit</div>
                 <div class="metric-meta">
                   <span class="text-success">Siap Disewa</span>
                 </div>
@@ -190,19 +176,33 @@
             </div>
 
             <div class="col-12 col-sm-6 col-xl-3">
+              <article class="metric-card metric-warning">
+                <div class="metric-top">
+                  <span class="metric-label">Total Unit Vila</span>
+                  <span class="metric-icon"><i class="bi bi-building" aria-hidden="true"></i></span>
+                </div>
+                <div class="metric-value">{{ $totalVillas ?? $villas->count() }} Unit</div>
+                <div class="metric-meta">
+                  <span class="text-primary">Terdaftar di Sistem</span>
+                </div>
+              </article>
+            </div>
+
+            <div class="col-12 col-sm-6 col-xl-3">
               <article class="metric-card metric-danger">
                 <div class="metric-top">
-                  <span class="metric-label">Menunggu Bayar</span>
-                  <span class="metric-icon"><i class="bi bi-hourglass-split" aria-hidden="true"></i></span>
+                  <span class="metric-label">Reservasi Aktif</span>
+                  <span class="metric-icon"><i class="bi bi-journal-bookmark" aria-hidden="true"></i></span>
                 </div>
-                <div class="metric-value">8 Pesanan</div>
+                <div class="metric-value">{{ $activeBookings ?? 0 }} Pesanan</div>
                 <div class="metric-meta">
-                  <span class="text-danger">Perlu Konfirmasi</span>
+                  <span class="text-warning">Pending & Confirmed</span>
                 </div>
               </article>
             </div>
           </section>
 
+          <!-- Section Grafik dan Aktivitas -->
           <section class="row g-3 mt-1">
             <div class="col-12 col-xl-8">
               <div class="panel">
@@ -235,15 +235,37 @@
                 </div>
 
                 <div class="activity-list">
-                  <div class="activity-item"><span class="activity-dot bg-primary"></span><div><p class="mb-1 fw-semibold">Vila Baru Didaftarkan</p><p class="text-muted small mb-0">Vila Mountain View berhasil ditambahkan.</p></div></div>
-                  <div class="activity-item"><span class="activity-dot bg-success"></span><div><p class="mb-1 fw-semibold">Pembayaran Lunas</p><p class="text-muted small mb-0">Reservasi #VG-902 terverifikasi.</p></div></div>
-                  <div class="activity-item"><span class="activity-dot bg-warning"></span><div><p class="mb-1 fw-semibold">Permintaan Check-out</p><p class="text-muted small mb-0">Tamu di Vila Beachside melakukan check-out.</p></div></div>
+                  <div class="activity-item"><span class="activity-dot bg-primary"></span><div><p class="mb-1 fw-semibold">Vila Baru Didaftarkan</p><p class="text-muted small mb-0">Data vila berhasil ditambahkan ke database.</p></div></div>
+                  <div class="activity-item"><span class="activity-dot bg-success"></span><div><p class="mb-1 fw-semibold">Pembayaran Lunas</p><p class="text-muted small mb-0">Transaksi reservasi terverifikasi.</p></div></div>
+                  <div class="activity-item"><span class="activity-dot bg-warning"></span><div><p class="mb-1 fw-semibold">Permintaan Check-out</p><p class="text-muted small mb-0">Tamu melakukan proses check-out.</p></div></div>
                 </div>
               </div>
             </div>
           </section>
 
+          <div class="row g-2 mb-3">
+          <!-- Section Tabel Daftar Vila -->
           <section class="panel mt-3">
+            <div class="row g-2 mb-3">
+              <div class="col-md-8">
+                <form action="{{ route('home') }}" method="GET" class="d-flex gap-2">
+                  <input type="text" name="search" class="form-control form-control-sm" placeholder="Cari nama atau lokasi vila..." value="{{ request('search') }}">
+                  
+                  <select name="status" class="form-select form-select-sm" style="max-width: 160px;">
+                    <option value="">Semua Status</option>
+                    <option value="available" {{ request('status') == 'available' ? 'selected' : '' }}>Tersedia</option>
+                    <option value="booked" {{ request('status') == 'booked' ? 'selected' : '' }}>Tersewa</option>
+                    <option value="maintenance" {{ request('status') == 'maintenance' ? 'selected' : '' }}>Maintenance</option>
+                  </select>
+
+                  <button type="submit" class="btn btn-sm btn-secondary"><i class="bi bi-search me-1"></i> Cari</button>
+                  @if(request('search') || request('status'))
+                    <a href="{{ route('home') }}" class="btn btn-sm btn-outline-danger"><i class="bi bi-x-circle"></i> Reset</a>
+                  @endif
+                </form>
+              </div>
+            </div>
+
             <div class="panel-header d-flex justify-content-between align-items-center">
               <div>
                 <h2 class="h5 mb-1 section-title"><i class="bi bi-building" aria-hidden="true"></i><span>Daftar Vila Terdaftar</span></h2>
@@ -313,6 +335,7 @@
               </table>
             </div>
           </section>
+
         </div>
       </main>
 

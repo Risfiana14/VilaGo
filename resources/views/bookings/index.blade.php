@@ -51,6 +51,28 @@
       </div>
     @endif
 
+    <!-- Form Pencarian & Filter Reservasi -->
+    <div class="row g-2 mb-3">
+      <div class="col-md-8">
+        <form action="{{ route('bookings.index') }}" method="GET" class="d-flex gap-2">
+          <input type="text" name="search" class="form-control form-control-sm" placeholder="Cari nama tamu atau No. Telp..." value="{{ request('search') }}">
+          
+          <select name="status" class="form-select form-select-sm" style="max-width: 170px;">
+            <option value="">Semua Status</option>
+            <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending (Menunggu)</option>
+            <option value="confirmed" {{ request('status') == 'confirmed' ? 'selected' : '' }}>Confirmed (Dikonfirmasi)</option>
+            <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed (Selesai)</option>
+            <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled (Dibatalkan)</option>
+          </select>
+
+          <button type="submit" class="btn btn-sm btn-secondary"><i class="bi bi-search me-1"></i> Cari</button>
+          @if(request('search') || request('status'))
+            <a href="{{ route('bookings.index') }}" class="btn btn-sm btn-outline-danger"><i class="bi bi-x-circle"></i> Reset</a>
+          @endif
+        </form>
+      </div>
+    </div>
+    
     <!-- Tabel Data Reservasi -->
     <div class="card card-custom">
       <div class="table-responsive">

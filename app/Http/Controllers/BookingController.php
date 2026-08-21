@@ -8,9 +8,25 @@ use Illuminate\Http\Request;
 
 class BookingController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $bookings = Booking::with('villa')->latest()->get();
+        $query = Booking::with('villa');
+
+        // Filter berdasarkan pencarian nama tamu atau nomor HP
+        if ($request->filled('search')) {
+            $query->where(function($q) use ($request) {
+                $q->where('customer_name', 'like', '%' . $request->search . '%')
+                ->orWhere('customer_phone', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        // Filter berdasarkan status reservasi
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $bookings = $query->latest()->get();
+
         return view('bookings.index', compact('bookings'));
     }
 
@@ -31,7 +47,7 @@ class BookingController extends Controller
             'total_price'    => 'required|numeric',
         ]);
 
-        Booking::create([
+        $booking = Booking::create([
             'villa_id'       => $request->villa_id,
             'customer_name'  => $request->customer_name,
             'customer_phone' => $request->customer_phone,
@@ -82,6 +98,13 @@ class BookingController extends Controller
 
         $booking->update(['status' => $request->status]);
 
-        return redirect()->back()->with('success', 'Status reservasi berhasil diperbarui!');
+        // Otomatisasi Sinkronisasi Status Vila
+        if ($request->status === 'confirmed') {
+            $booking->villa()->update(['status' => 'booked']);
+        } elseif (in_array($request->status, ['completed', 'cancelled'])) {
+            $booking->villa()->update(['status' => 'available']);
+        }
+
+        return redirect()->back()->with('success', 'Status reservasi & ketersediaan vila berhasil diperbarui!');
     }
 }
