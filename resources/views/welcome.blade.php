@@ -44,7 +44,7 @@
           <span class="nav-icon"><i class="bi bi-people" aria-hidden="true"></i></span>
           <span class="nav-text">Data Tamu</span>
         </a>
-        <a class="nav-link" href="#">
+        <a class="nav-link" href="{{ route('reports.index') }}">
           <span class="nav-icon"><i class="bi bi-bar-chart-line" aria-hidden="true"></i></span>
           <span class="nav-text">Laporan Keuangan</span>
         </a>
