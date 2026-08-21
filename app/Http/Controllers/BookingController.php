@@ -44,6 +44,36 @@ class BookingController extends Controller
         return redirect()->route('bookings.index')->with('success', 'Reservasi berhasil dibuat!');
     }
 
+    // Method edit() yang tadi hilang
+    public function edit(Booking $booking)
+    {
+        $villas = Villa::all();
+        return view('bookings.edit', compact('booking', 'villas'));
+    }
+
+    public function update(Request $request, Booking $booking)
+    {
+        $request->validate([
+            'villa_id'       => 'required|exists:villas,id',
+            'customer_name'  => 'required|string',
+            'customer_phone' => 'required|string',
+            'check_in'       => 'required|date',
+            'check_out'      => 'required|date|after:check_in',
+            'total_price'    => 'required|numeric',
+            'status'         => 'required|in:pending,confirmed,completed,cancelled',
+        ]);
+
+        $booking->update($request->all());
+
+        return redirect()->route('bookings.index')->with('success', 'Data reservasi berhasil diperbarui!');
+    }
+
+    public function destroy(Booking $booking)
+    {
+        $booking->delete();
+        return redirect()->route('bookings.index')->with('success', 'Data reservasi berhasil dihapus!');
+    }
+
     public function updateStatus(Request $request, Booking $booking)
     {
         $request->validate([
