@@ -40,7 +40,7 @@
           <span class="nav-icon"><i class="bi bi-journal-check" aria-hidden="true"></i></span>
           <span class="nav-text">Reservasi / Booking</span>
         </a>
-        <a class="nav-link" href="#">
+        <a class="nav-link" href="{{ route('guests.index') }}">
           <span class="nav-icon"><i class="bi bi-people" aria-hidden="true"></i></span>
           <span class="nav-text">Data Tamu</span>
         </a>
