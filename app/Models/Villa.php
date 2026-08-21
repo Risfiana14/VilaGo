@@ -20,4 +20,9 @@ class Villa extends Model
         'status',
         'image',
     ];
+
+    public function facilities()
+    {
+        return $this->belongsToMany(Facility::class);
+    }
 }

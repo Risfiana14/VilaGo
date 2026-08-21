@@ -3,7 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Villa;
-use App\Models\Booking; // Import Model Booking
+use App\Models\Booking;
+use App\Models\Facility; // 1. Import Model Facility
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -11,24 +12,21 @@ class VillaController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Villa::query();
+        $query = Villa::with('facilities');
 
-        // Filter berdasarkan kata kunci nama / lokasi
         if ($request->filled('search')) {
             $query->where(function($q) use ($request) {
                 $q->where('title', 'like', '%' . $request->search . '%')
-                ->orWhere('location', 'like', '%' . $request->search . '%');
+                  ->orWhere('location', 'like', '%' . $request->search . '%');
             });
         }
 
-        // Filter berdasarkan status vila
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
         $villas = $query->latest()->get();
 
-        // Hitung statistik
         $totalVillas = Villa::count();
         $availableVillas = Villa::where('status', 'available')->count();
         $activeBookings = Booking::whereIn('status', ['pending', 'confirmed'])->count();
@@ -39,7 +37,8 @@ class VillaController extends Controller
 
     public function create()
     {
-        return view('villas.create');
+        $facilities = Facility::all(); // Kirim data fasilitas ke form tambah
+        return view('villas.create', compact('facilities'));
     }
 
     public function store(Request $request)
@@ -52,9 +51,10 @@ class VillaController extends Controller
             'capacity'        => 'required|numeric',
             'description'     => 'required',
             'status'          => 'required|in:available,booked,maintenance',
+            'facilities'      => 'nullable|array', // Validasi input fasilitas
         ]);
 
-        Villa::create([
+        $villa = Villa::create([
             'title'           => $request->title,
             'slug'            => Str::slug($request->title),
             'location'        => $request->location,
@@ -65,12 +65,18 @@ class VillaController extends Controller
             'status'          => $request->status,
         ]);
 
+        // Hubungkan fasilitas yang dipilih ke vila baru
+        if ($request->has('facilities')) {
+            $villa->facilities()->attach($request->facilities);
+        }
+
         return redirect()->route('home')->with('success', 'Vila berhasil ditambahkan!');
     }
 
     public function edit(Villa $villa)
     {
-        return view('villas.edit', compact('villa'));
+        $facilities = Facility::all();
+        return view('villas.edit', compact('villa', 'facilities'));
     }
 
     public function update(Request $request, Villa $villa)
@@ -83,6 +89,7 @@ class VillaController extends Controller
             'capacity'        => 'required|numeric',
             'description'     => 'required',
             'status'          => 'required|in:available,booked,maintenance',
+            'facilities'      => 'nullable|array',
         ]);
 
         $villa->update([
@@ -95,6 +102,9 @@ class VillaController extends Controller
             'description'     => $request->description,
             'status'          => $request->status,
         ]);
+
+        // Sinkronisasi ulang daftar fasilitas vila
+        $villa->facilities()->sync($request->facilities ?? []);
 
         return redirect()->route('home')->with('success', 'Data vila berhasil diperbarui!');
     }

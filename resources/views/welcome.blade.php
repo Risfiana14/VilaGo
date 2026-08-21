@@ -48,7 +48,7 @@
           <span class="nav-icon"><i class="bi bi-bar-chart-line" aria-hidden="true"></i></span>
           <span class="nav-text">Laporan Keuangan</span>
         </a>
-        <a class="nav-link" href="#">
+        <a class="nav-link" href="{{ route('facilities.index') }}">
           <span class="nav-icon"><i class="bi bi-grid-3x3-gap" aria-hidden="true"></i></span>
           <span class="nav-text">Fasilitas</span>
         </a>

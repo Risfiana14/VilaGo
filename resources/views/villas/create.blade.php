@@ -22,18 +22,16 @@
       color: #fff;
       padding: 1.25rem 1.75rem;
     }
-    .form-label {
-      color: #495057;
-      font-size: 0.9rem;
-    }
-    .form-control, .form-select {
+    .facility-box {
+      border: 1px solid #e3e6f0;
       border-radius: 8px;
-      padding: 0.6rem 0.9rem;
-      border: 1px solid #ced4da;
+      padding: 10px 14px;
+      background-color: #fff;
+      transition: all 0.2s ease;
     }
-    .form-control:focus, .form-select:focus {
+    .facility-box:hover {
       border-color: #0d6efd;
-      box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+      background-color: #f8f9ff;
     }
     .btn-action {
       border-radius: 8px;
@@ -45,10 +43,9 @@
 <body>
   <div class="container py-5">
     <div class="row justify-content-center">
-      <div class="col-lg-8 col-md-10">
+      <div class="col-lg-9 col-md-11">
         <div class="card card-custom">
           
-          <!-- Header Card -->
           <div class="card-header-custom d-flex align-items-center justify-content-between">
             <h5 class="mb-0 fw-bold"><i class="bi bi-building-add me-2"></i>Tambah Data Vila Baru</h5>
             <span class="badge bg-white text-primary rounded-pill px-3 py-2">VilaGo System</span>
@@ -56,14 +53,10 @@
 
           <div class="card-body p-4 p-md-5">
 
-            <!-- Alert Notifikasi Error -->
             @if ($errors->any())
               <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
-                <div class="d-flex align-items-center mb-2">
-                  <i class="bi bi-exclamation-triangle-fill fs-5 me-2"></i>
-                  <strong class="fs-6">Gagal Menyimpan Data</strong>
-                </div>
-                <ul class="mb-0 ps-3 small">
+                <strong class="fs-6"><i class="bi bi-exclamation-triangle-fill me-2"></i>Gagal Menyimpan Data:</strong>
+                <ul class="mb-0 mt-2 ps-3 small">
                   @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
                   @endforeach
@@ -121,15 +114,39 @@
                 </div>
               </div>
 
+              <!-- Pilihan Fasilitas Vila (Dinamis dari Master Fasilitas) -->
+              <div class="mb-4">
+                <label class="form-label fw-semibold d-block">Pilih Fasilitas Vila</label>
+                <div class="row g-2">
+                  @forelse($facilities as $facility)
+                    <div class="col-md-4 col-sm-6">
+                      <div class="facility-box">
+                        <div class="form-check m-0">
+                          <input class="form-check-input" type="checkbox" name="facilities[]" value="{{ $facility->id }}" id="facility_{{ $facility->id }}" {{ is_array(old('facilities')) && in_array($facility->id, old('facilities')) ? 'checked' : '' }}>
+                          <label class="form-check-label fw-medium ms-1" for="facility_{{ $facility->id }}">
+                            <i class="bi {{ $facility->icon }} text-primary me-1"></i> {{ $facility->name }}
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  @empty
+                    <div class="col-12">
+                      <div class="alert alert-light border mb-0 text-muted small">
+                        Belum ada fasilitas terdaftar di master data. <a href="{{ route('facilities.index') }}" target="_blank">Tambah Fasilitas Sekarang</a>
+                      </div>
+                    </div>
+                  @endforelse
+                </div>
+              </div>
+
               <!-- Deskripsi -->
               <div class="mb-4">
-                <label class="form-label fw-semibold">Deskripsi & Fasilitas Vila <span class="text-danger">*</span></label>
-                <textarea name="description" class="form-control" rows="4" placeholder="Jelaskan fasilitas utama seperti jumlah kamar tidur, kolam renang, WiFi, dll..." required>{{ old('description') }}</textarea>
+                <label class="form-label fw-semibold">Deskripsi Singkat <span class="text-danger">*</span></label>
+                <textarea name="description" class="form-control" rows="3" placeholder="Tuliskan deskripsi keunggulan vila..." required>{{ old('description') }}</textarea>
               </div>
 
               <hr class="my-4 text-muted opacity-25">
 
-              <!-- Tombol Aksi -->
               <div class="d-flex justify-content-between align-items-center">
                 <a href="{{ route('home') }}" class="btn btn-outline-secondary btn-action">
                   <i class="bi bi-arrow-left me-1"></i> Kembali
