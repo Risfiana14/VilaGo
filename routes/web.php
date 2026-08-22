@@ -6,6 +6,7 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\GuestController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\FacilityController;
+use App\Http\Controllers\SettingController;
 
 Route::get('/', [VillaController::class, 'index'])->name('home');
 Route::resource('villas', VillaController::class);
@@ -14,3 +15,5 @@ Route::patch('bookings/{booking}/status', [BookingController::class, 'updateStat
 Route::get('/guests', [GuestController::class, 'index'])->name('guests.index');
 Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
 Route::resource('facilities', FacilityController::class)->only(['index', 'store', 'destroy']);
+Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
+Route::put('/settings/{setting}', [SettingController::class, 'update'])->name('settings.update');
