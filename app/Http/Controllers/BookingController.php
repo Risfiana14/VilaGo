@@ -40,24 +40,36 @@ class BookingController extends Controller
     {
         $request->validate([
             'villa_id'       => 'required|exists:villas,id',
-            'customer_name'  => 'required|string',
-            'customer_phone' => 'required|string',
+            'customer_name'  => 'required|string|max:255',
+            'customer_phone' => 'required|string|max:20',
             'check_in'       => 'required|date',
             'check_out'      => 'required|date|after:check_in',
-            'total_price'    => 'required|numeric',
         ]);
 
-        $booking = Booking::create([
-            'villa_id'       => $request->villa_id,
+        $villa = \App\Models\Villa::findOrFail($request->villa_id);
+
+        // Hitung durasi dan total harga
+        $checkIn = \Carbon\Carbon::parse($request->check_in);
+        $checkOut = \Carbon\Carbon::parse($request->check_out);
+        $nights = $checkIn->diffInDays($checkOut);
+        $totalPrice = $nights * $villa->price_per_night;
+
+        \App\Models\Booking::create([
+            'villa_id'       => $villa->id,
             'customer_name'  => $request->customer_name,
             'customer_phone' => $request->customer_phone,
             'check_in'       => $request->check_in,
             'check_out'      => $request->check_out,
-            'total_price'    => $request->total_price,
+            'total_price'    => $totalPrice,
             'status'         => 'pending',
         ]);
 
-        return redirect()->route('bookings.index')->with('success', 'Reservasi berhasil dibuat!');
+        // Redireksi berdasarkan Role
+        if (auth()->user()->role === 'admin') {
+            return redirect()->route('bookings.index')->with('success', 'Reservasi berhasil ditambahkan!');
+        }
+
+        return redirect()->route('user.dashboard')->with('success', 'Pemesanan vila berhasil dikirim! Silakan tunggu konfirmasi admin.');
     }
 
     // Method edit() yang tadi hilang
