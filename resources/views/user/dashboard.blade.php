@@ -72,6 +72,8 @@
     <div class="container">
       <a class="navbar-brand fw-bold text-primary fs-4" href="{{ route('user.dashboard') }}"><i class="bi bi-house-door-fill me-2"></i>VilaGo</a>
       <div class="d-flex align-items-center gap-3">
+        <!-- Navigasi Riwayat Pemesanan Pelanggan -->
+        <a href="{{ route('user.my_bookings') }}" class="btn btn-sm btn-outline-primary fw-semibold"><i class="bi bi-journal-check me-1"></i> Riwayat Saya</a>
         <span class="fw-semibold text-dark"><i class="bi bi-person-circle me-1 text-primary"></i> {{ Auth::user()->name }}</span>
         <form action="{{ route('logout') }}" method="POST">
           @csrf

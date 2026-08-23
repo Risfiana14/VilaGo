@@ -114,7 +114,14 @@
                 <li><a class="dropdown-item" href="#">Profil Saya</a></li>
                 <li><a class="dropdown-item" href="#">Pengaturan Akun</a></li>
                 <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="#">Keluar</a></li>
+                <li>
+                  <form action="{{ route('logout') }}" method="POST" class="d-inline">
+                    @csrf
+                    <button type="submit" class="dropdown-item text-danger w-100 text-start border-0 bg-transparent">
+                      <i class="bi bi-box-arrow-right me-1"></i> Keluar
+                    </button>
+                  </form>
+                </li>
               </ul>
             </div>
           </div>

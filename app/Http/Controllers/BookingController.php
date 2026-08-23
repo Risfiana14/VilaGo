@@ -65,11 +65,11 @@ class BookingController extends Controller
         ]);
 
         // Redireksi berdasarkan Role
-        if (auth()->user()->role === 'admin') {
-            return redirect()->route('bookings.index')->with('success', 'Reservasi berhasil ditambahkan!');
-        }
+    if (auth()->user()->role === 'admin') {
+        return redirect()->route('bookings.index')->with('success', 'Reservasi berhasil ditambahkan!');
+    }
 
-        return redirect()->route('user.dashboard')->with('success', 'Pemesanan vila berhasil dikirim! Silakan tunggu konfirmasi admin.');
+    return redirect()->route('user.my_bookings')->with('success', 'Pemesanan berhasil! Silakan lakukan pembayaran dan unggah bukti transfer.');
     }
 
     // Method edit() yang tadi hilang
@@ -118,5 +118,39 @@ class BookingController extends Controller
         }
 
         return redirect()->back()->with('success', 'Status reservasi & ketersediaan vila berhasil diperbarui!');
+    }
+
+    // Halaman Riwayat Pemesanan Saya (User)
+    public function myBookings()
+    {
+        $bookings = \App\Models\Booking::with('villa')
+            ->where('customer_name', auth()->user()->name)
+            ->latest()
+            ->get();
+
+        return view('user.my_bookings', compact('bookings'));
+    }
+
+    // Proses Upload Bukti Pembayaran
+    public function uploadPayment(Request $request, $id)
+    {
+        $request->validate([
+            'payment_method' => 'required|string',
+            'payment_proof'  => 'required|image|mimes:jpg,jpeg,png|max:2048',
+        ]);
+
+        $booking = \App\Models\Booking::findOrFail($id);
+
+        if ($request->hasFile('payment_proof')) {
+            $fileName = time() . '_' . $request->file('payment_proof')->getClientOriginalName();
+            $request->file('payment_proof')->move(public_path('assets/images/payments'), $fileName);
+            
+            $booking->update([
+                'payment_proof'  => $fileName,
+                'payment_method' => $request->payment_method,
+            ]);
+        }
+
+        return back()->with('success', 'Bukti pembayaran berhasil diunggah! Admin akan segera memverifikasi.');
     }
 }
