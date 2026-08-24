@@ -102,22 +102,26 @@ class BookingController extends Controller
         return redirect()->route('bookings.index')->with('success', 'Data reservasi berhasil dihapus!');
     }
 
-    public function updateStatus(Request $request, Booking $booking)
+    public function updateStatus(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|in:pending,confirmed,completed,cancelled'
+            'status' => 'required|in:pending,confirmed,completed,cancelled',
         ]);
 
+        $booking = \App\Models\Booking::findOrFail($id);
         $booking->update(['status' => $request->status]);
 
-        // Otomatisasi Sinkronisasi Status Vila
-        if ($request->status === 'confirmed') {
-            $booking->villa()->update(['status' => 'booked']);
-        } elseif (in_array($request->status, ['completed', 'cancelled'])) {
-            $booking->villa()->update(['status' => 'available']);
+        // Jika pesanan selesai (completed) atau dibatalkan (cancelled),
+        // kembalikan status unit vila menjadi 'available'
+        if (in_array($request->status, ['completed', 'cancelled'])) {
+            $booking->villa->update(['status' => 'available']);
+        } 
+        // Jika pesanan terkonfirmasi (confirmed), set status vila menjadi 'booked'
+        elseif ($request->status === 'confirmed') {
+            $booking->villa->update(['status' => 'booked']);
         }
 
-        return redirect()->back()->with('success', 'Status reservasi & ketersediaan vila berhasil diperbarui!');
+        return back()->with('success', 'Status reservasi dan ketersediaan vila berhasil diperbarui!');
     }
 
     // 2. Tampilkan Riwayat Pemesanan Khusus Akun Tersebut
