@@ -10,17 +10,25 @@ class Booking extends Model
     use HasFactory;
 
     protected $fillable = [
-        'villa_id', 'customer_name', 'customer_phone', 
-        'check_in', 'check_out', 'total_price', 'status'
+        'user_id', // Menambahkan relasi ke ID Akun
+        'villa_id',
+        'customer_name',
+        'customer_phone',
+        'check_in',
+        'check_out',
+        'total_price',
+        'status',
+        'payment_proof',
+        'payment_method',
     ];
 
     public function villa()
     {
-        return $table = $this->belongsTo(Villa::class);
+        return $this->belongsTo(Villa::class);
     }
 
-    public function bookings()
+    public function user()
     {
-        return $this->hasMany(Booking::class);
+        return $this->belongsTo(User::class);
     }
 }

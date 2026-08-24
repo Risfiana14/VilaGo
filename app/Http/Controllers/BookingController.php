@@ -36,11 +36,12 @@ class BookingController extends Controller
         return view('bookings.create', compact('villas'));
     }
 
+    // 1. Simpan Pemesanan (Otomatis mencatat ID Akun Login)
     public function store(Request $request)
     {
         $request->validate([
             'villa_id'       => 'required|exists:villas,id',
-            'customer_name'  => 'required|string|max:255',
+            'customer_name'  => 'required|string|max:255', // Bebas diisi nama siapapun
             'customer_phone' => 'required|string|max:20',
             'check_in'       => 'required|date',
             'check_out'      => 'required|date|after:check_in',
@@ -48,15 +49,15 @@ class BookingController extends Controller
 
         $villa = \App\Models\Villa::findOrFail($request->villa_id);
 
-        // Hitung durasi dan total harga
         $checkIn = \Carbon\Carbon::parse($request->check_in);
         $checkOut = \Carbon\Carbon::parse($request->check_out);
         $nights = $checkIn->diffInDays($checkOut);
         $totalPrice = $nights * $villa->price_per_night;
 
         \App\Models\Booking::create([
+            'user_id'        => auth()->id(), // Otomatis mengunci reservasi ke akun yang sedang login
             'villa_id'       => $villa->id,
-            'customer_name'  => $request->customer_name,
+            'customer_name'  => $request->customer_name, // Nama tamu yang menginap
             'customer_phone' => $request->customer_phone,
             'check_in'       => $request->check_in,
             'check_out'      => $request->check_out,
@@ -64,12 +65,11 @@ class BookingController extends Controller
             'status'         => 'pending',
         ]);
 
-        // Redireksi berdasarkan Role
-    if (auth()->user()->role === 'admin') {
-        return redirect()->route('bookings.index')->with('success', 'Reservasi berhasil ditambahkan!');
-    }
+        if (auth()->user()->role === 'admin') {
+            return redirect()->route('bookings.index')->with('success', 'Reservasi berhasil ditambahkan!');
+        }
 
-    return redirect()->route('user.my_bookings')->with('success', 'Pemesanan berhasil! Silakan lakukan pembayaran dan unggah bukti transfer.');
+        return redirect()->route('user.my_bookings')->with('success', 'Pemesanan berhasil! Silakan unggah bukti transfer pembayaran.');
     }
 
     // Method edit() yang tadi hilang
@@ -120,11 +120,12 @@ class BookingController extends Controller
         return redirect()->back()->with('success', 'Status reservasi & ketersediaan vila berhasil diperbarui!');
     }
 
-    // Halaman Riwayat Pemesanan Saya (User)
+    // 2. Tampilkan Riwayat Pemesanan Khusus Akun Tersebut
     public function myBookings()
     {
+        // Hanya mengambil data reservasi milik akun yang sedang login
         $bookings = \App\Models\Booking::with('villa')
-            ->where('customer_name', auth()->user()->name)
+            ->where('user_id', auth()->id())
             ->latest()
             ->get();
 
