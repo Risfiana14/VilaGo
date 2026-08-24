@@ -9,6 +9,7 @@
 </head>
 <body class="bg-light">
 
+  <!-- Navbar -->
   <nav class="navbar navbar-expand-lg bg-white shadow-sm py-3 sticky-top">
     <div class="container">
       <a class="navbar-brand fw-bold text-primary fs-4" href="{{ route('user.dashboard') }}"><i class="bi bi-house-door-fill me-2"></i>VilaGo</a>
@@ -26,9 +27,18 @@
   <div class="container py-4">
     <h4 class="fw-bold mb-3"><i class="bi bi-receipt me-2 text-primary"></i>Riwayat Reservasi & Pembayaran</h4>
 
+    <!-- Alert Sukses -->
     @if(session('success'))
       <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
         <i class="bi bi-check-circle-fill me-2"></i>{{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    @endif
+
+    <!-- Alert Error Validasi -->
+    @if($errors->any())
+      <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i> Pengunggahan gagal. Periksa format file gambar Anda (Maks 5MB, Format JPG/PNG).
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
       </div>
     @endif
@@ -43,7 +53,7 @@
                 <th>Tanggal Stay</th>
                 <th>Total Bayar</th>
                 <th>Status Pemesanan</th>
-                <th>Pembayaran</th>
+                <th>Status Pembayaran</th>
                 <th class="text-end">Aksi / Instruksi</th>
               </tr>
             </thead>
@@ -72,55 +82,75 @@
                   </td>
                   <td>
                     @if($booking->payment_proof)
-                      <span class="badge bg-info text-dark"><i class="bi bi-check-all me-1"></i>Bukti Terkirim</span>
+                      <span class="badge bg-info text-dark mb-1 d-inline-block"><i class="bi bi-check-all me-1"></i>Bukti Terkirim</span>
+                      <small class="d-block text-muted">via {{ $booking->payment_method }}</small>
                     @else
                       <span class="badge bg-secondary">Belum Lunas</span>
                     @endif
                   </td>
                   <td class="text-end">
-                    <!-- Tombol Modal Upload Bayar -->
-                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#payModal{{ $booking->id }}">
-                      <i class="bi bi-wallet2 me-1"></i> Instuksi & Upload Bayar
+                    <!-- Tombol Modal Trigger -->
+                    <button type="button" class="btn btn-sm {{ $booking->payment_proof ? 'btn-outline-success' : 'btn-primary' }}" data-bs-toggle="modal" data-bs-target="#payModal{{ $booking->id }}">
+                      <i class="bi {{ $booking->payment_proof ? 'bi-image' : 'bi-wallet2' }} me-1"></i> 
+                      {{ $booking->payment_proof ? 'Lihat / Ganti Bukti' : 'Instruksi & Upload Bayar' }}
                     </button>
 
-                    <!-- Modal Upload Bukti Transfer -->
-                    <div class="modal fade text-start" id="payModal{{ $booking->id }}" tabindex="-1">
-                      <div class="modal-dialog">
+                    <!-- Modal Upload & Detail Pembayaran -->
+                    <div class="modal fade text-start" id="payModal{{ $booking->id }}" tabindex="-1" aria-hidden="true">
+                      <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
                           <div class="modal-header">
-                            <h5 class="modal-title fw-bold">Instruksi Pembayaran</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            <h5 class="modal-title fw-bold"><i class="bi bi-credit-card-2-front me-2 text-primary"></i>Instruksi Pembayaran</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                           </div>
+                          
                           <form action="{{ route('user.upload_payment', $booking->id) }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             <div class="modal-body">
-                              <div class="alert alert-info small">
-                                Silakan transfer sebesar <strong>Rp {{ number_format($booking->total_price, 0, ',', '.') }}</strong> ke rekening berikut:
-                                <ul class="mb-0 mt-2 ps-3">
-                                  <li><strong>BCA:</strong> 8830-1234-56 (a.n. VilaGo Utama)</li>
-                                  <li><strong>Mandiri:</strong> 142-00-9876-543 (a.n. VilaGo Utama)</li>
+                              
+                              <!-- Informasi Rekening Transfer -->
+                              <div class="alert alert-info small mb-3">
+                                Silakan transfer sebesar <strong class="text-primary fs-6">Rp {{ number_format($booking->total_price, 0, ',', '.') }}</strong> ke rekening berikut:
+                                <ul class="mb-0 mt-2 ps-3 fw-semibold">
+                                  <li>BCA: 8830-1234-56 (a.n. VilaGo Utama)</li>
+                                  <li>Mandiri: 142-00-9876-543 (a.n. VilaGo Utama)</li>
                                 </ul>
                               </div>
+
+                              <!-- Preview Jika Sudah Pernah Upload -->
+                              @if($booking->payment_proof)
+                                <div class="mb-3 p-2 border rounded bg-light text-center">
+                                  <small class="fw-semibold d-block text-muted mb-2">Bukti Pembayaran Terkirim:</small>
+                                  <img src="{{ asset('assets/images/payments/' . $booking->payment_proof) }}" class="img-fluid rounded border" style="max-height: 180px;" alt="Bukti Transfer">
+                                </div>
+                              @endif
 
                               <div class="mb-3">
                                 <label class="form-label fw-semibold">Pilih Bank Transfer</label>
                                 <select name="payment_method" class="form-select" required>
-                                  <option value="Bank BCA">Bank BCA</option>
-                                  <option value="Bank Mandiri">Bank Mandiri</option>
-                                  <option value="QRIS">QRIS</option>
+                                  <option value="Bank BCA" {{ $booking->payment_method == 'Bank BCA' ? 'selected' : '' }}>Bank BCA</option>
+                                  <option value="Bank Mandiri" {{ $booking->payment_method == 'Bank Mandiri' ? 'selected' : '' }}>Bank Mandiri</option>
+                                  <option value="QRIS" {{ $booking->payment_method == 'QRIS' ? 'selected' : '' }}>QRIS</option>
                                 </select>
                               </div>
 
                               <div class="mb-3">
-                                <label class="form-label fw-semibold">Unggah Bukti Transfer (Image)</label>
-                                <input type="file" name="payment_proof" class="form-control" accept="image/*" required>
+                                <label class="form-label fw-semibold">
+                                  {{ $booking->payment_proof ? 'Ganti File Bukti Transfer' : 'Unggah Bukti Transfer (Image)' }}
+                                </label>
+                                <input type="file" name="payment_proof" class="form-control" accept="image/png, image/jpeg, image/jpg, image/webp" required>
+                                <small class="text-muted">Format: JPG, JPEG, PNG, WEBP (Maksimal 5MB)</small>
                               </div>
+
                             </div>
                             <div class="modal-footer">
-                              <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
-                              <button type="submit" class="btn btn-primary btn-sm">Kirim Bukti Pembayaran</button>
+                              <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Tutup</button>
+                              <button type="submit" class="btn btn-primary btn-sm">
+                                <i class="bi bi-upload me-1"></i> Kirim Bukti Pembayaran
+                              </button>
                             </div>
                           </form>
+
                         </div>
                       </div>
                     </div>

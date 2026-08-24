@@ -136,21 +136,36 @@ class BookingController extends Controller
     {
         $request->validate([
             'payment_method' => 'required|string',
-            'payment_proof'  => 'required|image|mimes:jpg,jpeg,png|max:2048',
+            'payment_proof'  => 'required|image|mimes:jpeg,jpg,png,webp|max:5120', // Maksimal 5MB
+        ], [
+            'payment_proof.required' => 'File bukti pembayaran wajib diunggah.',
+            'payment_proof.image'    => 'File harus berupa gambar.',
+            'payment_proof.mimes'    => 'Format gambar harus JPG, JPEG, PNG, atau WEBP.',
+            'payment_proof.max'      => 'Ukuran file gambar maksimal 5MB.',
         ]);
 
         $booking = \App\Models\Booking::findOrFail($id);
 
         if ($request->hasFile('payment_proof')) {
-            $fileName = time() . '_' . $request->file('payment_proof')->getClientOriginalName();
-            $request->file('payment_proof')->move(public_path('assets/images/payments'), $fileName);
+            $file = $request->file('payment_proof');
+            $fileName = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
             
+            // Pastikan direktori folder tersedia
+            $destinationPath = public_path('assets/images/payments');
+            if (!file_exists($destinationPath)) {
+                mkdir($destinationPath, 0777, true);
+            }
+
+            // Pindahkan file ke folder public/assets/images/payments
+            $file->move($destinationPath, $fileName);
+            
+            // Update data booking
             $booking->update([
                 'payment_proof'  => $fileName,
                 'payment_method' => $request->payment_method,
             ]);
         }
 
-        return back()->with('success', 'Bukti pembayaran berhasil diunggah! Admin akan segera memverifikasi.');
+        return redirect()->route('user.my_bookings')->with('success', 'Bukti pembayaran berhasil diunggah! Admin akan segera memverifikasi pesanan Anda.');
     }
 }
