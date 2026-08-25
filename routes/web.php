@@ -22,6 +22,9 @@ Route::middleware(['auth'])->group(function () {
         return view('user.dashboard');
     })->name('user.dashboard');
 
+    // Rute Detail Vila untuk Tamu/User
+    Route::get('/villas/{id}', [VillaController::class, 'showUserDetail'])->name('user.villas.show');
+    
     // Riwayat Pemesanan & Upload Pembayaran Pelanggan
     Route::get('/my-bookings', [BookingController::class, 'myBookings'])->name('user.my_bookings');
     Route::post('/my-bookings/{id}/upload-payment', [BookingController::class, 'uploadPayment'])->name('user.upload_payment');

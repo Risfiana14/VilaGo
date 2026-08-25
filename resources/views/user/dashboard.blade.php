@@ -72,7 +72,6 @@
     <div class="container">
       <a class="navbar-brand fw-bold text-primary fs-4" href="{{ route('user.dashboard') }}"><i class="bi bi-house-door-fill me-2"></i>VilaGo</a>
       <div class="d-flex align-items-center gap-3">
-        <!-- Navigasi Riwayat Pemesanan Pelanggan -->
         <a href="{{ route('user.my_bookings') }}" class="btn btn-sm btn-outline-primary fw-semibold"><i class="bi bi-journal-check me-1"></i> Riwayat Saya</a>
         <span class="fw-semibold text-dark"><i class="bi bi-person-circle me-1 text-primary"></i> {{ Auth::user()->name }}</span>
         <form action="{{ route('logout') }}" method="POST">
@@ -94,7 +93,7 @@
     <!-- Header Section -->
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h4 class="fw-bold mb-0 text-dark"><i class="bi bi-building me-2 text-primary"></i>Daftar Vila Tersedia</h4>
-      <span class="text-muted small">Pilih vila dan lakukan pemesanan secara langsung</span>
+      <span class="text-muted small">Pilih vila untuk melihat detail informasi dan pemesanan</span>
     </div>
 
     <!-- Alert Notifikasi -->
@@ -105,18 +104,17 @@
       </div>
     @endif
     
-    <!-- Katalog Vila -->
+    <!-- Daftar Vila -->
     <div class="row g-4">
       @php
         $villas = \App\Models\Villa::with('facilities')->where('status', 'available')->latest()->get();
       @endphp
 
-      @forelse($villas as $index => $villa)
+      @forelse($villas as $index => $itemVilla)
         @php
-          // Penentuan file gambar lokal di public/assets/images/
           $localImage = 'vila-' . (($index % 4) + 1) . '.jpg'; 
-          $imagePath = $villa->image && file_exists(public_path('assets/images/' . $villa->image)) 
-                        ? $villa->image 
+          $imagePath = $itemVilla->image && file_exists(public_path('assets/images/' . $itemVilla->image)) 
+                        ? $itemVilla->image 
                         : $localImage;
         @endphp
 
@@ -124,24 +122,28 @@
           <div class="card card-villa h-100">
             
             <!-- Gambar Vila & Badge Overlays -->
-            <div class="villa-img-container">
-              <img src="{{ asset('assets/images/' . $imagePath) }}" class="villa-img" alt="{{ $villa->title }}">
+            <a href="{{ route('villas.show', $itemVilla->id) }}" class="villa-img-container d-block">
+              <img src="{{ asset('assets/images/' . $imagePath) }}" class="villa-img" alt="{{ $itemVilla->title }}">
               <span class="badge bg-success badge-status">Tersedia</span>
-              <span class="badge-capacity"><i class="bi bi-people-fill me-1"></i>Kapasitas: {{ $villa->capacity }} Orang</span>
-            </div>
+              <span class="badge-capacity"><i class="bi bi-people-fill me-1"></i>Kapasitas: {{ $itemVilla->capacity }} Orang</span>
+            </a>
 
             <!-- Body Card -->
             <div class="card-body p-4 d-flex flex-column justify-content-between">
               <div>
-                <h5 class="fw-bold text-dark mb-1">{{ $villa->title }}</h5>
-                <p class="text-muted small mb-2"><i class="bi bi-geo-alt me-1 text-danger"></i>{{ $villa->location }}</p>
-                <p class="text-secondary small mb-3">{{ Str::limit($villa->description, 85) }}</p>
+                <h5 class="fw-bold mb-1">
+                  <a href="{{ route('villas.show', $itemVilla->id) }}" class="text-dark text-decoration-none">
+                    {{ $itemVilla->title }}
+                  </a>
+                </h5>
+                <p class="text-muted small mb-2"><i class="bi bi-geo-alt me-1 text-danger"></i>{{ $itemVilla->location }}</p>
+                <p class="text-secondary small mb-3">{{ Str::limit($itemVilla->description, 85) }}</p>
                 
                 <!-- Fasilitas Utama -->
                 <div class="mb-3">
                   <small class="fw-semibold text-muted d-block mb-2">Fasilitas Utama:</small>
                   <div class="d-flex flex-wrap gap-1">
-                    @forelse($villa->facilities as $fac)
+                    @forelse($itemVilla->facilities as $fac)
                       <span class="badge bg-light text-dark border"><i class="bi {{ $fac->icon }} text-primary me-1"></i> {{ $fac->name }}</span>
                     @empty
                       <span class="text-muted small">-</span>
@@ -150,19 +152,24 @@
                 </div>
               </div>
 
-              <!-- Footer Harga & Aksi Booking Langsung -->
+              <!-- Footer Harga & Tombol Aksi -->
               <div>
                 <hr class="my-3 opacity-25">
-                <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex justify-content-between align-items-center gap-2">
                   <div>
                     <small class="text-muted d-block small">Harga per malam</small>
-                    <span class="fw-bold text-primary fs-5">Rp {{ number_format($villa->price_per_night, 0, ',', '.') }}</span>
+                    <span class="fw-bold text-primary fs-6">Rp {{ number_format($itemVilla->price_per_night, 0, ',', '.') }}</span>
                   </div>
                   
-                  <!-- Tombol Booking Diarahkan ke Form Pemesanan Aplikasi -->
-                  <a href="{{ route('bookings.create', ['villa_id' => $villa->id]) }}" class="btn btn-primary fw-semibold btn-sm px-3 shadow-sm">
-                    <i class="bi bi-journal-plus me-1"></i> Pesan Vila
-                  </a>
+                  <div class="d-flex gap-1">
+                    <a href="{{ route('villas.show', $itemVilla->id) }}" class="btn btn-outline-primary btn-sm fw-semibold">
+                      <i class="bi bi-eye me-1"></i> Detail
+                    </a>
+                    
+                    <a href="{{ route('bookings.create', ['villa_id' => $itemVilla->id]) }}" class="btn btn-primary btn-sm fw-semibold px-2 shadow-sm">
+                      <i class="bi bi-journal-plus me-1"></i> Pesan
+                    </a>
+                  </div>
                 </div>
               </div>
 
@@ -180,5 +187,7 @@
     </div>
 
   </div>
+
+  <script src="{{ asset('assets/js/bootstrap.bundle.min.js') }}"></script>
 </body>
 </html>

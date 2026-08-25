@@ -114,4 +114,10 @@ class VillaController extends Controller
         $villa->delete();
         return redirect()->route('home')->with('success', 'Vila berhasil dihapus!');
     }
+
+    public function showUserDetail($id)
+    {
+        $villa = \App\Models\Villa::with('facilities')->findOrFail($id);
+        return view('user.villa_detail', compact('villa'));
+    }
 }
