@@ -2,37 +2,44 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Setting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class SettingController extends Controller
 {
+    // Menampilkan halaman Pengaturan Akun
     public function index()
     {
-        // Ambil data pengaturan pertama, jika belum ada buat data default
-        $setting = Setting::firstOrCreate([], [
-            'app_name'    => 'VilaGo',
-            'app_email'   => 'admin@vilago.com',
-            'app_phone'   => '081234567890',
-            'app_address' => 'Jl. Raya Utama No. 1, Batu, Malang',
-            'service_fee' => 0,
-        ]);
-
-        return view('settings.index', compact('setting'));
+        $user = auth()->user();
+        return view('settings.index', compact('user'));
     }
 
-    public function update(Request $request, Setting $setting)
+    // Memperbarui nama, email, dan kata sandi akun yang login
+    public function update(Request $request)
     {
+        $user = auth()->user();
+
         $request->validate([
-            'app_name'    => 'required|string|max:255',
-            'app_email'   => 'required|email|max:255',
-            'app_phone'   => 'required|string|max:20',
-            'app_address' => 'required|string',
-            'service_fee' => 'required|numeric|min:0|max:100',
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|email|max:255|unique:users,email,' . $user->id,
+            'password' => 'nullable|min:6|confirmed',
+        ], [
+            'name.required'      => 'Nama wajib diisi.',
+            'email.required'     => 'Email wajib diisi.',
+            'email.unique'       => 'Email sudah digunakan oleh akun lain.',
+            'password.min'       => 'Password minimal 6 karakter.',
+            'password.confirmed' => 'Konfirmasi password tidak cocok.',
         ]);
 
-        $setting->update($request->all());
+        $user->name = $request->name;
+        $user->email = $request->email;
 
-        return redirect()->back()->with('success', 'Pengaturan sistem berhasil diperbarui!');
+        if ($request->filled('password')) {
+            $user->password = Hash::make($request->password);
+        }
+
+        $user->save();
+
+        return back()->with('success', 'Pengaturan akun berhasil diperbarui!');
     }
 }

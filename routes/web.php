@@ -23,7 +23,7 @@ Route::middleware(['auth'])->group(function () {
     })->name('user.dashboard');
 
     // Rute Detail Vila untuk Tamu/User
-    Route::get('/villas/{id}', [VillaController::class, 'showUserDetail'])->name('user.villas.show');
+    Route::get('/villas/{villa}', [VillaController::class, 'show'])->name('villas.show');
     
     // Riwayat Pemesanan & Upload Pembayaran Pelanggan
     Route::get('/my-bookings', [BookingController::class, 'myBookings'])->name('user.my_bookings');
@@ -32,12 +32,16 @@ Route::middleware(['auth'])->group(function () {
     // Tamu Membuat Booking
     Route::get('/bookings/create', [BookingController::class, 'create'])->name('bookings.create');
     Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
+
+    // Modul Pengaturan Akun (Profil, Email, & Password)
+    Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
+    Route::put('/settings', [SettingController::class, 'update'])->name('settings.update');
 });
 
 // 3. Rute Khusus ADMIN (Protected Middleware Admin)
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/', [VillaController::class, 'index'])->name('home');
-    Route::resource('villas', VillaController::class);
+    Route::resource('villas', VillaController::class)->except(['show']);
     
     // Kelola Booking Khusus Admin (Menggunakan URL /admin/bookings)
     Route::get('/admin/bookings', [BookingController::class, 'index'])->name('bookings.index');
@@ -51,6 +55,4 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/guests', [GuestController::class, 'index'])->name('guests.index');
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
     Route::resource('facilities', FacilityController::class)->only(['index', 'store', 'destroy']);
-    Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
-    Route::put('/settings/{setting}', [SettingController::class, 'update'])->name('settings.update');
 });

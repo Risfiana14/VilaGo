@@ -51,6 +51,11 @@
       padding: 4px 12px 4px 6px;
       border-radius: 30px;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+      transition: all 0.2s ease;
+    }
+    .user-profile-badge:hover {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
     }
     .user-avatar {
       width: 32px;
@@ -141,7 +146,7 @@
         <span class="navbar-toggler-icon"></span>
       </button>
 
-      <!-- Nav Items -->
+      <!-- Nav Items (Tersisa Daftar Vila & Riwayat Saya) -->
       <div class="collapse navbar-collapse" id="userNavbar">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-1">
           <li class="nav-item">
@@ -156,15 +161,16 @@
           </li>
         </ul>
 
-        <!-- Profil & Logout Action -->
+        <!-- Profil Action (Satu-satunya Tautan ke Pengaturan Akun) -->
         <div class="d-flex align-items-center gap-3 pt-2 pt-lg-0 border-top border-lg-0 border-light mt-2 mt-lg-0">
-          <div class="user-profile-badge d-flex align-items-center me-1">
+          <a href="{{ route('settings.index') }}" class="user-profile-badge d-flex align-items-center text-decoration-none" title="Buka Pengaturan Akun">
             <div class="user-avatar me-2">
               {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
             </div>
             <span class="fw-semibold text-dark small pe-1">{{ Auth::user()->name }}</span>
-          </div>
+          </a>
 
+          <!-- Logout Button -->
           <form action="{{ route('logout') }}" method="POST" class="m-0">
             @csrf
             <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3 py-1 font-semibold d-flex align-items-center">
@@ -185,7 +191,7 @@
       <p class="mb-0 opacity-90">Temukan pilihan vila terbaik dan nikmati liburan nyaman di Malang & Batu.</p>
     </div>
 
-    <!-- Header Section (Tanpa Sub-Header) -->
+    <!-- Header Section -->
     <div class="d-flex align-items-center mb-4">
       <h4 class="fw-bold mb-0 text-dark"><i class="bi bi-building me-2 text-primary"></i>Daftar Vila Tersedia</h4>
     </div>
