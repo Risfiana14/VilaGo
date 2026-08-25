@@ -8,134 +8,197 @@
   <link rel="stylesheet" href="{{ asset('assets/vendors/bootstrap-icons/bootstrap-icons.css') }}">
   <style>
     body { 
-      background-color: #f4f6f9; 
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+      background-color: #f8fafc; 
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
     }
+    
+    /* Navbar Custom Styles */
+    .custom-navbar {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .brand-logo {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #0d6efd, #0a58ca);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      box-shadow: 0 4px 10px rgba(13, 110, 253, 0.25);
+    }
+    .nav-pill-custom {
+      color: #64748b;
+      font-weight: 600;
+      font-size: 0.9rem;
+      padding: 8px 16px;
+      border-radius: 30px;
+      transition: all 0.2s ease;
+    }
+    .nav-pill-custom:hover {
+      color: #0d6efd;
+      background-color: #f1f5f9;
+    }
+    .nav-pill-custom.active {
+      color: #0d6efd !important;
+      background-color: #eff6ff !important;
+    }
+    .user-profile-badge {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      padding: 4px 12px 4px 6px;
+      border-radius: 30px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+    }
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: white;
+      font-weight: 700;
+      font-size: 0.85rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Card & Banner Custom */
     .hero-banner { 
-      background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%); 
+      background: linear-gradient(135deg, #0d6efd 0%, #06b6d4 100%); 
       color: white; 
-      border-radius: 12px; 
+      border-radius: 16px; 
     }
     .card-villa { 
       border: none; 
-      border-radius: 12px; 
-      box-shadow: 0 5px 15px rgba(0,0,0,0.05); 
-      transition: transform 0.2s, box-shadow 0.2s; 
+      border-radius: 16px; 
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04); 
+      transition: all 0.3s ease; 
       overflow: hidden;
+      background: #ffffff;
     }
     .card-villa:hover { 
-      transform: translateY(-5px); 
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      transform: translateY(-6px); 
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
     }
     .villa-img-container {
       position: relative;
-      height: 200px;
+      height: 210px;
       overflow: hidden;
-      background-color: #e9ecef;
+      background-color: #f1f5f9;
     }
     .villa-img {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transition: transform 0.3s ease;
+      transition: transform 0.4s ease;
     }
     .card-villa:hover .villa-img {
-      transform: scale(1.05);
+      transform: scale(1.06);
     }
     .badge-status {
       position: absolute;
-      top: 12px;
-      right: 12px;
-      padding: 6px 12px;
-      border-radius: 20px;
+      top: 14px;
+      right: 14px;
+      padding: 6px 14px;
+      border-radius: 30px;
       font-weight: 600;
       font-size: 0.75rem;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
     .badge-capacity {
       position: absolute;
-      bottom: 12px;
-      left: 12px;
-      background: rgba(0, 0, 0, 0.65);
+      bottom: 14px;
+      left: 14px;
+      background: rgba(15, 23, 42, 0.75);
       color: #fff;
-      backdrop-filter: blur(4px);
-      padding: 4px 10px;
-      border-radius: 6px;
+      backdrop-filter: blur(6px);
+      padding: 5px 12px;
+      border-radius: 8px;
       font-size: 0.75rem;
+      font-weight: 500;
     }
   </style>
 </head>
 <body>
   
-  <!-- Navbar Clean & Modern -->
-  <nav class="navbar navbar-expand-lg bg-white shadow-sm py-2 sticky-top border-bottom border-light">
+  <!-- Navbar Sleek & Clean -->
+  <nav class="navbar navbar-expand-lg sticky-top custom-navbar py-2 shadow-sm">
     <div class="container">
-      <a class="navbar-brand d-flex align-items-center fw-bold text-primary fs-4 me-4" href="{{ route('user.dashboard') }}">
-        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 38px; height: 38px;">
+      
+      <!-- Logo Brand -->
+      <a class="navbar-brand d-flex align-items-center me-4" href="{{ route('user.dashboard') }}">
+        <div class="brand-logo me-2">
           <i class="bi bi-house-door-fill fs-5"></i>
         </div>
-        <span>Vila<span class="text-dark">Go</span></span>
+        <span class="fw-bold fs-4 text-dark tracking-tight">Vila<span class="text-primary">Go</span></span>
       </a>
 
+      <!-- Mobile Toggle Button -->
       <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#userNavbar">
         <span class="navbar-toggler-icon"></span>
       </button>
 
+      <!-- Nav Items -->
       <div class="collapse navbar-collapse" id="userNavbar">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-1">
           <li class="nav-item">
-            <a class="nav-link px-3 rounded-pill fw-semibold active bg-primary text-white" href="{{ route('user.dashboard') }}">
+            <a class="nav-link nav-pill-custom active" href="{{ route('user.dashboard') }}">
               <i class="bi bi-grid-fill me-1"></i> Daftar Vila
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link px-3 rounded-pill fw-medium text-secondary" href="{{ route('user.my_bookings') }}">
+            <a class="nav-link nav-pill-custom" href="{{ route('user.my_bookings') }}">
               <i class="bi bi-journal-check me-1"></i> Riwayat saya
             </a>
           </li>
         </ul>
 
+        <!-- Profil & Logout Action -->
         <div class="d-flex align-items-center gap-3 pt-2 pt-lg-0 border-top border-lg-0 border-light mt-2 mt-lg-0">
-          <div class="d-flex align-items-center bg-light border rounded-pill px-3 py-1 shadow-sm">
-            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2 fw-semibold" style="width: 28px; height: 28px; font-size: 0.85rem;">
+          <div class="user-profile-badge d-flex align-items-center me-1">
+            <div class="user-avatar me-2">
               {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
             </div>
-            <span class="fw-semibold text-dark small">{{ Auth::user()->name }}</span>
+            <span class="fw-semibold text-dark small pe-1">{{ Auth::user()->name }}</span>
           </div>
 
           <form action="{{ route('logout') }}" method="POST" class="m-0">
             @csrf
-            <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3">
+            <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3 py-1 font-semibold d-flex align-items-center">
               <i class="bi bi-box-arrow-right me-1"></i> Logout
             </button>
           </form>
         </div>
       </div>
+
     </div>
   </nav>
 
   <div class="container py-4">
+    
     <!-- Hero Banner -->
     <div class="hero-banner p-4 p-md-5 mb-4 shadow-sm">
       <h2 class="fw-bold mb-2">Selamat Datang di VilaGo!</h2>
-      <p class="mb-0 opacity-75">Temukan pilihan vila terbaik dan nikmati liburan nyaman di Malang & Batu.</p>
+      <p class="mb-0 opacity-90">Temukan pilihan vila terbaik dan nikmati liburan nyaman di Malang & Batu.</p>
     </div>
 
-    <!-- Header Section -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <!-- Header Section (Tanpa Sub-Header) -->
+    <div class="d-flex align-items-center mb-4">
       <h4 class="fw-bold mb-0 text-dark"><i class="bi bi-building me-2 text-primary"></i>Daftar Vila Tersedia</h4>
-      <span class="text-muted small">Pilih vila untuk melihat detail informasi dan pemesanan</span>
     </div>
 
     <!-- Alert Notifikasi -->
     @if(session('success'))
-      <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+      <div class="alert alert-success border-0 shadow-sm alert-dismissible fade show mb-4" role="alert">
         <i class="bi bi-check-circle-fill me-2"></i>{{ session('success') }}
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
       </div>
     @endif
     
-    <!-- Daftar Vila -->
+    <!-- Catalog Grid Vila -->
     <div class="row g-4">
       @php
         $villas = \App\Models\Villa::with('facilities')->where('status', 'available')->latest()->get();
@@ -151,6 +214,7 @@
 
         <div class="col-md-6 col-lg-4">
           <div class="card card-villa h-100">
+            
             <a href="{{ route('villas.show', $itemVilla->id) }}" class="villa-img-container d-block">
               <img src="{{ asset('assets/images/' . $imagePath) }}" class="villa-img" alt="{{ $itemVilla->title }}">
               <span class="badge bg-success badge-status">Tersedia</span>
@@ -188,10 +252,10 @@
                   </div>
                   
                   <div class="d-flex gap-1">
-                    <a href="{{ route('villas.show', $itemVilla->id) }}" class="btn btn-outline-primary btn-sm fw-semibold">
+                    <a href="{{ route('villas.show', $itemVilla->id) }}" class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-semibold">
                       <i class="bi bi-eye me-1"></i> Detail
                     </a>
-                    <a href="{{ route('bookings.create', ['villa_id' => $itemVilla->id]) }}" class="btn btn-primary btn-sm fw-semibold px-2 shadow-sm">
+                    <a href="{{ route('bookings.create', ['villa_id' => $itemVilla->id]) }}" class="btn btn-primary btn-sm rounded-pill px-3 fw-semibold shadow-sm">
                       <i class="bi bi-journal-plus me-1"></i> Pesan
                     </a>
                   </div>
