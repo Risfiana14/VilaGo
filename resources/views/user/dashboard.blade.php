@@ -67,23 +67,54 @@
 </head>
 <body>
   
-  <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg bg-white shadow-sm py-3 sticky-top">
+  <!-- Navbar Clean & Modern -->
+  <nav class="navbar navbar-expand-lg bg-white shadow-sm py-2 sticky-top border-bottom border-light">
     <div class="container">
-      <a class="navbar-brand fw-bold text-primary fs-4" href="{{ route('user.dashboard') }}"><i class="bi bi-house-door-fill me-2"></i>VilaGo</a>
-      <div class="d-flex align-items-center gap-3">
-        <a href="{{ route('user.my_bookings') }}" class="btn btn-sm btn-outline-primary fw-semibold"><i class="bi bi-journal-check me-1"></i> Riwayat Saya</a>
-        <span class="fw-semibold text-dark"><i class="bi bi-person-circle me-1 text-primary"></i> {{ Auth::user()->name }}</span>
-        <form action="{{ route('logout') }}" method="POST">
-          @csrf
-          <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-box-arrow-right me-1"></i> Logout</button>
-        </form>
+      <a class="navbar-brand d-flex align-items-center fw-bold text-primary fs-4 me-4" href="{{ route('user.dashboard') }}">
+        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 38px; height: 38px;">
+          <i class="bi bi-house-door-fill fs-5"></i>
+        </div>
+        <span>Vila<span class="text-dark">Go</span></span>
+      </a>
+
+      <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#userNavbar">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="userNavbar">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-1">
+          <li class="nav-item">
+            <a class="nav-link px-3 rounded-pill fw-semibold active bg-primary text-white" href="{{ route('user.dashboard') }}">
+              <i class="bi bi-grid-fill me-1"></i> Daftar Vila
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link px-3 rounded-pill fw-medium text-secondary" href="{{ route('user.my_bookings') }}">
+              <i class="bi bi-journal-check me-1"></i> Riwayat saya
+            </a>
+          </li>
+        </ul>
+
+        <div class="d-flex align-items-center gap-3 pt-2 pt-lg-0 border-top border-lg-0 border-light mt-2 mt-lg-0">
+          <div class="d-flex align-items-center bg-light border rounded-pill px-3 py-1 shadow-sm">
+            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2 fw-semibold" style="width: 28px; height: 28px; font-size: 0.85rem;">
+              {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+            </div>
+            <span class="fw-semibold text-dark small">{{ Auth::user()->name }}</span>
+          </div>
+
+          <form action="{{ route('logout') }}" method="POST" class="m-0">
+            @csrf
+            <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3">
+              <i class="bi bi-box-arrow-right me-1"></i> Logout
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   </nav>
 
   <div class="container py-4">
-    
     <!-- Hero Banner -->
     <div class="hero-banner p-4 p-md-5 mb-4 shadow-sm">
       <h2 class="fw-bold mb-2">Selamat Datang di VilaGo!</h2>
@@ -100,7 +131,7 @@
     @if(session('success'))
       <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
         <i class="bi bi-check-circle-fill me-2"></i>{{ session('success') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
       </div>
     @endif
     
@@ -120,15 +151,12 @@
 
         <div class="col-md-6 col-lg-4">
           <div class="card card-villa h-100">
-            
-            <!-- Gambar Vila & Badge Overlays -->
             <a href="{{ route('villas.show', $itemVilla->id) }}" class="villa-img-container d-block">
               <img src="{{ asset('assets/images/' . $imagePath) }}" class="villa-img" alt="{{ $itemVilla->title }}">
               <span class="badge bg-success badge-status">Tersedia</span>
               <span class="badge-capacity"><i class="bi bi-people-fill me-1"></i>Kapasitas: {{ $itemVilla->capacity }} Orang</span>
             </a>
 
-            <!-- Body Card -->
             <div class="card-body p-4 d-flex flex-column justify-content-between">
               <div>
                 <h5 class="fw-bold mb-1">
@@ -139,7 +167,6 @@
                 <p class="text-muted small mb-2"><i class="bi bi-geo-alt me-1 text-danger"></i>{{ $itemVilla->location }}</p>
                 <p class="text-secondary small mb-3">{{ Str::limit($itemVilla->description, 85) }}</p>
                 
-                <!-- Fasilitas Utama -->
                 <div class="mb-3">
                   <small class="fw-semibold text-muted d-block mb-2">Fasilitas Utama:</small>
                   <div class="d-flex flex-wrap gap-1">
@@ -152,7 +179,6 @@
                 </div>
               </div>
 
-              <!-- Footer Harga & Tombol Aksi -->
               <div>
                 <hr class="my-3 opacity-25">
                 <div class="d-flex justify-content-between align-items-center gap-2">
@@ -165,7 +191,6 @@
                     <a href="{{ route('villas.show', $itemVilla->id) }}" class="btn btn-outline-primary btn-sm fw-semibold">
                       <i class="bi bi-eye me-1"></i> Detail
                     </a>
-                    
                     <a href="{{ route('bookings.create', ['villa_id' => $itemVilla->id]) }}" class="btn btn-primary btn-sm fw-semibold px-2 shadow-sm">
                       <i class="bi bi-journal-plus me-1"></i> Pesan
                     </a>
