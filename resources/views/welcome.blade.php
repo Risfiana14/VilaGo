@@ -61,12 +61,6 @@
         </a>
       </nav>
 
-      <div class="sidebar-user">
-        <img class="avatar-img avatar-md sidebar-user-avatar" src="{{ asset('assets/images/avatar/avatar.jpg') }}" alt="Admin VilaGo">
-        <strong>{{ Auth::user()->name ?? 'Admin VilaGo' }}</strong>
-        <small>Pengelola Sistem</small>
-      </div>
-
       <div class="sidebar-footer">
         <span class="status-dot"></span>
         <span class="sidebar-footer-text">Sistem Berjalan Lancar</span>

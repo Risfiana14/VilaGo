@@ -88,18 +88,10 @@ class VillaController extends Controller
         return redirect()->route('home')->with('success', 'Vila berhasil ditambahkan!');
     }
 
-    /**
-     * Menampilkan detail vila untuk pelanggan/user
-     */
     public function show($id)
     {
-        $villa = Villa::with('facilities')->findOrFail($id);
-
-        // Memeriksa jika ada file view 'villas.show', jika tidak ada gunakan 'user.villa_detail'
-        if (view()->exists('villas.show')) {
-            return view('villas.show', compact('villa'));
-        }
-
+        // Wajib load relasi 'reviews.user' agar data ulasan terbawa ke halaman detail
+        $villa = Villa::with(['facilities', 'reviews.user'])->findOrFail($id);
         return view('user.villa_detail', compact('villa'));
     }
 

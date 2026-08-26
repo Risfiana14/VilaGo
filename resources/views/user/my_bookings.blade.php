@@ -122,7 +122,6 @@
                     @endif
                   </td>
                   <td>
-                    <!-- Logika Tampilan Status Pembayaran -->
                     @if($booking->status == 'cancelled')
                       <span class="badge bg-danger text-white mb-1 d-inline-block"><i class="bi bi-x-circle-fill me-1"></i>Dibatalkan</span>
                       @if($booking->payment_proof)
@@ -142,13 +141,11 @@
                   </td>
                   <td class="text-end">
                     <div class="d-flex justify-content-end gap-1">
-                      <!-- Tombol Bayar / Detail -->
                       <button type="button" class="btn btn-sm {{ in_array($booking->status, ['confirmed', 'completed']) ? 'btn-outline-success' : ($booking->payment_proof ? 'btn-outline-primary' : 'btn-primary') }}" data-bs-toggle="modal" data-bs-target="#payModal{{ $booking->id }}">
                         <i class="bi {{ $booking->payment_proof ? 'bi-receipt' : 'bi-wallet2' }} me-1"></i> 
                         {{ in_array($booking->status, ['confirmed', 'completed']) ? 'Detail' : ($booking->payment_proof ? 'Lihat/Ganti' : 'Bayar') }}
                       </button>
 
-                      <!-- Logika Penampilan Tombol Batal -->
                       @php
                         $checkInHours = \Carbon\Carbon::now()->diffInHours(\Carbon\Carbon::parse($booking->check_in), false);
                         $isPending = $booking->status === 'pending';
@@ -166,48 +163,48 @@
                       @endif
                     </div>
 
-                    <!-- Modal Pembayaran / Detail -->
+                    <!-- Modal Detail & Ulasan -->
                     <div class="modal fade text-start" id="payModal{{ $booking->id }}" tabindex="-1" aria-hidden="true">
                       <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
                           <div class="modal-header">
-                            <h5 class="modal-title fw-bold"><i class="bi bi-credit-card-2-front me-2 text-primary"></i>Informasi Pembayaran</h5>
+                            <h5 class="modal-title fw-bold"><i class="bi bi-credit-card-2-front me-2 text-primary"></i>Informasi Pembayaran & Detail</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                           </div>
                           
-                          <form action="{{ route('user.upload_payment', $booking->id) }}" method="POST" enctype="multipart/form-data">
-                            @csrf
-                            <div class="modal-body">
-                              @if($booking->status == 'cancelled')
-                                <div class="alert alert-danger text-center mb-3">
-                                  <i class="bi bi-x-circle-fill fs-2 d-block mb-1"></i>
-                                  <strong class="d-block fs-6">Reservasi Ini Telah Dibatalkan</strong>
-                                  <small>Apabila dana sudah terlanjur dikirim, tim VilaGo akan segera memproses pengembalian dana ke rekening Anda.</small>
-                                </div>
-                              @elseif(in_array($booking->status, ['confirmed', 'completed']))
-                                <div class="alert alert-success text-center mb-3">
-                                  <i class="bi bi-check-circle-fill fs-2 d-block mb-1"></i>
-                                  <strong class="d-block fs-6">Pembayaran Telah Diverifikasi & Lunas!</strong>
-                                  <small>Terima kasih, reservasi Anda telah terkonfirmasi oleh Admin VilaGo.</small>
-                                </div>
-                              @else
-                                <div class="alert alert-info small mb-3">
-                                  Silakan transfer sebesar <strong class="text-primary fs-6">Rp {{ number_format($booking->total_price, 0, ',', '.') }}</strong> ke rekening berikut:
-                                  <ul class="mb-0 mt-2 ps-3 fw-semibold">
-                                    <li>BCA: 8830-1234-56 (a.n. VilaGo Utama)</li>
-                                    <li>Mandiri: 142-00-9876-543 (a.n. VilaGo Utama)</li>
-                                  </ul>
-                                </div>
-                              @endif
+                          <div class="modal-body">
+                            @if($booking->status == 'cancelled')
+                              <div class="alert alert-danger text-center mb-3">
+                                <i class="bi bi-x-circle-fill fs-2 d-block mb-1"></i>
+                                <strong class="d-block fs-6">Reservasi Ini Telah Dibatalkan</strong>
+                                <small>Apabila dana sudah terlanjur dikirim, tim VilaGo akan segera memproses pengembalian dana ke rekening Anda.</small>
+                              </div>
+                            @elseif(in_array($booking->status, ['confirmed', 'completed']))
+                              <div class="alert alert-success text-center mb-3">
+                                <i class="bi bi-check-circle-fill fs-2 d-block mb-1"></i>
+                                <strong class="d-block fs-6">Pembayaran Telah Diverifikasi & Lunas!</strong>
+                                <small>Terima kasih, reservasi Anda telah terkonfirmasi oleh Admin VilaGo.</small>
+                              </div>
+                            @else
+                              <div class="alert alert-info small mb-3">
+                                Silakan transfer sebesar <strong class="text-primary fs-6">Rp {{ number_format($booking->total_price, 0, ',', '.') }}</strong> ke rekening berikut:
+                                <ul class="mb-0 mt-2 ps-3 fw-semibold">
+                                  <li>BCA: 8830-1234-56 (a.n. VilaGo Utama)</li>
+                                  <li>Mandiri: 142-00-9876-543 (a.n. VilaGo Utama)</li>
+                                </ul>
+                              </div>
+                            @endif
 
-                              @if($booking->payment_proof)
-                                <div class="mb-3 p-2 border rounded bg-light text-center">
-                                  <small class="fw-semibold d-block text-muted mb-2">Bukti Pembayaran Terkirim:</small>
-                                  <img src="{{ asset('assets/images/payments/' . $booking->payment_proof) }}" class="img-fluid rounded border" style="max-height: 200px;" alt="Bukti Transfer">
-                                </div>
-                              @endif
+                            @if($booking->payment_proof)
+                              <div class="mb-3 p-2 border rounded bg-light text-center">
+                                <small class="fw-semibold d-block text-muted mb-2">Bukti Pembayaran Terkirim:</small>
+                                <img src="{{ asset('assets/images/payments/' . $booking->payment_proof) }}" class="img-fluid rounded border" style="max-height: 200px;" alt="Bukti Transfer">
+                              </div>
+                            @endif
 
-                              @if(!in_array($booking->status, ['confirmed', 'completed', 'cancelled']))
+                            @if(!in_array($booking->status, ['confirmed', 'completed', 'cancelled']))
+                              <form action="{{ route('user.upload_payment', $booking->id) }}" method="POST" enctype="multipart/form-data">
+                                @csrf
                                 <div class="mb-3">
                                   <label class="form-label fw-semibold">Pilih Bank Transfer</label>
                                   <select name="payment_method" class="form-select" required>
@@ -223,17 +220,60 @@
                                   </label>
                                   <input type="file" name="payment_proof" class="form-control" accept="image/*" required>
                                 </div>
-                              @endif
-                            </div>
-                            <div class="modal-footer">
-                              <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Tutup</button>
-                              @if(!in_array($booking->status, ['confirmed', 'completed', 'cancelled']))
-                                <button type="submit" class="btn btn-primary btn-sm">
+
+                                <button type="submit" class="btn btn-primary btn-sm w-100">
                                   <i class="bi bi-upload me-1"></i> Kirim Bukti Pembayaran
                                 </button>
-                              @endif
-                            </div>
-                          </form>
+                              </form>
+                            @endif
+
+                            <!-- Komponen Form / Hasil Ulasan (Hanya Muncul jika Status 'Completed') -->
+                            @if($booking->status == 'completed')
+                              <div class="border-top pt-3 mt-3">
+                                <h6 class="fw-bold mb-2"><i class="bi bi-star-fill text-warning me-1"></i>Ulasan Pengalaman Menginap</h6>
+
+                                @if($booking->review)
+                                  <div class="p-3 bg-light rounded border">
+                                    <div class="text-warning mb-1">
+                                      @for($i = 1; $i <= 5; $i++)
+                                        <i class="bi bi-star-fill{{ $i <= $booking->review->rating ? '' : ' text-muted opacity-25' }}"></i>
+                                      @endfor
+                                      <span class="fw-bold text-dark ms-1">({{ $booking->review->rating }}/5)</span>
+                                    </div>
+                                    <p class="mb-0 text-secondary small">"{{ $booking->review->comment }}"</p>
+                                  </div>
+                                @else
+                                  <form action="{{ route('user.store_review', $booking->id) }}" method="POST">
+                                    @csrf
+                                    <div class="mb-2">
+                                      <label class="form-label small fw-semibold mb-1">Pilih Rating Bintang</label>
+                                      <select name="rating" class="form-select form-select-sm" required>
+                                        <option value="">-- Beri Bintang --</option>
+                                        <option value="5">⭐⭐⭐⭐⭐ (5/5) Sangat Puas</option>
+                                        <option value="4">⭐⭐⭐⭐ (4/5) Bagus</option>
+                                        <option value="3">⭐⭐⭐ (3/5) Cukup</option>
+                                        <option value="2">⭐⭐ (2/5) Kurang</option>
+                                        <option value="1">⭐ (1/5) Buruk</option>
+                                      </select>
+                                    </div>
+
+                                    <div class="mb-2">
+                                      <label class="form-label small fw-semibold mb-1">Tuliskan Ulasan Anda</label>
+                                      <textarea name="comment" class="form-control form-control-sm" rows="3" placeholder="Bagikan impresi Anda tentang kebersihan, fasilitas, dan kenyamanan vila..." required></textarea>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-sm btn-warning text-dark fw-semibold w-100">
+                                      <i class="bi bi-send me-1"></i> Kirim Ulasan
+                                    </button>
+                                  </form>
+                                @endif
+                              </div>
+                            @endif
+                          </div>
+
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Tutup</button>
+                          </div>
                         </div>
                       </div>
                     </div>

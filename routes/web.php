@@ -8,6 +8,7 @@ use App\Http\Controllers\GuestController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\FacilityController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\ReviewController;
 
 // 1. Rute Otentikasi (Auth)
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -29,6 +30,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/my-bookings', [BookingController::class, 'myBookings'])->name('user.my_bookings');
     Route::post('/my-bookings/{id}/upload-payment', [BookingController::class, 'uploadPayment'])->name('user.upload_payment');
     Route::patch('/my-bookings/{id}/cancel', [BookingController::class, 'cancel'])->name('user.cancel_booking');
+    Route::post('/my-bookings/{bookingId}/review', [ReviewController::class, 'store'])->name('user.store_review');
 
     // Tamu Membuat Booking
     Route::get('/bookings/create', [BookingController::class, 'create'])->name('bookings.create');

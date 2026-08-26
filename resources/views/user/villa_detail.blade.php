@@ -71,20 +71,20 @@
     </nav>
 
     <div class="row g-4">
-      <!-- Kolom Kiri: Gambar & Detail -->
+      <!-- Kolom Kiri: Gambar, Detail, Fasilitas, & Ulasan -->
       <div class="col-lg-8">
         @php
           $imagePath = $villa->image && file_exists(public_path('assets/images/' . $villa->image)) 
                         ? asset('assets/images/' . $villa->image) 
                         : asset('assets/images/vila-1.jpg');
         @endphp
-        
+
         <img src="{{ $imagePath }}" class="hero-img shadow-sm mb-4" alt="{{ $villa->title }}">
 
         <div class="card border-0 shadow-sm rounded-3 p-4 mb-4">
           <h3 class="fw-bold text-dark mb-2">{{ $villa->title }}</h3>
           <p class="text-danger fw-semibold mb-3"><i class="bi bi-geo-alt-fill me-1"></i>{{ $villa->location }}</p>
-          
+
           <h5 class="fw-bold text-dark mb-2">Deskripsi Vila</h5>
           <p class="text-secondary leading-relaxed mb-4" style="white-space: pre-line;">{{ $villa->description }}</p>
 
@@ -100,7 +100,7 @@
               </div>
             </div>
 
-            @forelse($villa->facilities as $fac)
+            @forelse($villa->facilities ?? [] as $fac)
               <div class="col-6 col-md-4">
                 <div class="facility-box d-flex align-items-center">
                   <i class="bi {{ $fac->icon }} fs-4 text-primary me-3"></i>
@@ -117,9 +117,50 @@
             @endforelse
           </div>
         </div>
+
+        <!-- Section Ulasan Tamu -->
+        <div class="card border-0 shadow-sm rounded-3 p-4">
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <h5 class="fw-bold mb-0"><i class="bi bi-chat-square-text-fill text-primary me-2"></i>Ulasan Pengunjung</h5>
+            
+            @php
+              // Pengamanan: Jika relasi reviews null, gunakan collection kosong agar tidak error
+              $reviewsList = $villa->reviews ?? collect();
+              $avgRating = method_exists($villa, 'averageRating') ? $villa->averageRating() : round($reviewsList->avg('rating') ?? 0, 1);
+              $reviewCount = $reviewsList->count();
+            @endphp
+            
+            <div class="badge bg-warning text-dark fs-6 px-3 py-2 rounded-pill">
+              <i class="bi bi-star-fill me-1"></i>{{ $avgRating }} / 5.0 ({{ $reviewCount }} Ulasan)
+            </div>
+          </div>
+
+          <div class="review-list">
+            @forelse($reviewsList as $review)
+              <div class="border-bottom py-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                  <strong class="text-dark">{{ optional($review->user)->name ?? 'Tamu VilaGo' }}</strong>
+                  <small class="text-muted">{{ $review->created_at->format('d M Y') }}</small>
+                </div>
+                <div class="text-warning mb-2" style="font-size: 0.85rem;">
+                  @for($i = 1; $i <= 5; $i++)
+                    <i class="bi bi-star-fill{{ $i <= $review->rating ? '' : ' text-muted opacity-25' }}"></i>
+                  @endfor
+                </div>
+                <p class="mb-0 text-secondary small">{{ $review->comment }}</p>
+              </div>
+            @empty
+              <div class="text-center py-4 text-muted">
+                <i class="bi bi-chat-left-dots fs-3 d-block mb-1 opacity-50"></i>
+                <small>Belum ada ulasan untuk vila ini.</small>
+              </div>
+            @endforelse
+          </div>
+        </div>
+
       </div>
 
-      <!-- Kolom Kanan: Card Harga & Form Pemesanan -->
+      <!-- Kolom Kanan: Card Harga & Pemesanan -->
       <div class="col-lg-4">
         <div class="card border-0 shadow-sm rounded-3 p-4 sticky-top" style="top: 90px;">
           <small class="text-muted d-block">Harga Sewa / Malam</small>

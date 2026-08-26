@@ -25,4 +25,9 @@ class Villa extends Model
     {
         return $this->belongsToMany(Facility::class);
     }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
 }
