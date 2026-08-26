@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Villa;
 use App\Models\Booking;
-use App\Models\Facility; // 1. Import Model Facility
+use App\Models\Facility;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -37,7 +37,7 @@ class VillaController extends Controller
 
     public function create()
     {
-        $facilities = Facility::all(); // Kirim data fasilitas ke form tambah
+        $facilities = Facility::all();
         return view('villas.create', compact('facilities'));
     }
 
@@ -51,7 +51,7 @@ class VillaController extends Controller
             'capacity'        => 'required|numeric',
             'description'     => 'required',
             'status'          => 'required|in:available,booked,maintenance',
-            'facilities'      => 'nullable|array', // Validasi input fasilitas
+            'facilities'      => 'nullable|array',
         ]);
 
         $villa = Villa::create([
@@ -65,12 +65,26 @@ class VillaController extends Controller
             'status'          => $request->status,
         ]);
 
-        // Hubungkan fasilitas yang dipilih ke vila baru
         if ($request->has('facilities')) {
             $villa->facilities()->attach($request->facilities);
         }
 
         return redirect()->route('home')->with('success', 'Vila berhasil ditambahkan!');
+    }
+
+    /**
+     * Menampilkan detail vila untuk pelanggan/user
+     */
+    public function show($id)
+    {
+        $villa = Villa::with('facilities')->findOrFail($id);
+
+        // Memeriksa jika ada file view 'villas.show', jika tidak ada gunakan 'user.villa_detail'
+        if (view()->exists('villas.show')) {
+            return view('villas.show', compact('villa'));
+        }
+
+        return view('user.villa_detail', compact('villa'));
     }
 
     public function edit(Villa $villa)
@@ -103,7 +117,6 @@ class VillaController extends Controller
             'status'          => $request->status,
         ]);
 
-        // Sinkronisasi ulang daftar fasilitas vila
         $villa->facilities()->sync($request->facilities ?? []);
 
         return redirect()->route('home')->with('success', 'Data vila berhasil diperbarui!');
@@ -113,11 +126,5 @@ class VillaController extends Controller
     {
         $villa->delete();
         return redirect()->route('home')->with('success', 'Vila berhasil dihapus!');
-    }
-
-    public function showUserDetail($id)
-    {
-        $villa = \App\Models\Villa::with('facilities')->findOrFail($id);
-        return view('user.villa_detail', compact('villa'));
     }
 }

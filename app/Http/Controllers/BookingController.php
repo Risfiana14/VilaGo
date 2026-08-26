@@ -173,4 +173,15 @@ class BookingController extends Controller
 
         return redirect()->route('user.my_bookings')->with('success', 'Bukti pembayaran berhasil diunggah! Admin akan segera memverifikasi pesanan Anda.');
     }
+
+    public function cancel($id)
+    {
+        $booking = \App\Models\Booking::where('user_id', auth()->id())
+            ->where('status', 'pending')
+            ->findOrFail($id);
+
+        $booking->update(['status' => 'cancelled']);
+
+        return back()->with('success', 'Reservasi berhasil dibatalkan.');
+    }
 }

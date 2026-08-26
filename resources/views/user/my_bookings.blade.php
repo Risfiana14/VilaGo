@@ -6,17 +6,28 @@
   <title>Riwayat Pemesanan | VilaGo</title>
   <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.min.css') }}">
   <link rel="stylesheet" href="{{ asset('assets/vendors/bootstrap-icons/bootstrap-icons.css') }}">
+  <style>
+    body { background-color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    .custom-navbar { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid #e2e8f0; }
+    .brand-logo { width: 40px; height: 40px; background: linear-gradient(135deg, #0d6efd, #0a58ca); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; box-shadow: 0 4px 10px rgba(13, 110, 253, 0.25); }
+    .nav-pill-custom { color: #64748b; font-weight: 600; font-size: 0.9rem; padding: 8px 16px; border-radius: 30px; transition: all 0.2s ease; }
+    .nav-pill-custom:hover { color: #0d6efd; background-color: #f1f5f9; }
+    .nav-pill-custom.active { color: #0d6efd !important; background-color: #eff6ff !important; }
+    .user-profile-badge { background: #ffffff; border: 1px solid #e2e8f0; padding: 4px 12px 4px 6px; border-radius: 30px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03); transition: all 0.2s ease; }
+    .user-profile-badge:hover { background: #f1f5f9; border-color: #cbd5e1; }
+    .user-avatar { width: 32px; height: 32px; background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; font-weight: 700; font-size: 0.85rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+  </style>
 </head>
 <body class="bg-light">
 
-  <!-- Navbar Clean & Modern -->
-  <nav class="navbar navbar-expand-lg bg-white shadow-sm py-2 sticky-top border-bottom border-light">
+  <!-- Navbar Sleek & Clean -->
+  <nav class="navbar navbar-expand-lg sticky-top custom-navbar py-2 shadow-sm">
     <div class="container">
-      <a class="navbar-brand d-flex align-items-center fw-bold text-primary fs-4 me-4" href="{{ route('user.dashboard') }}">
-        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 38px; height: 38px;">
+      <a class="navbar-brand d-flex align-items-center me-4" href="{{ route('user.dashboard') }}">
+        <div class="brand-logo me-2">
           <i class="bi bi-house-door-fill fs-5"></i>
         </div>
-        <span>Vila<span class="text-dark">Go</span></span>
+        <span class="fw-bold fs-4 text-dark tracking-tight">Vila<span class="text-primary">Go</span></span>
       </a>
 
       <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#userNavbar">
@@ -26,28 +37,28 @@
       <div class="collapse navbar-collapse" id="userNavbar">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-1">
           <li class="nav-item">
-            <a class="nav-link px-3 rounded-pill fw-medium text-secondary" href="{{ route('user.dashboard') }}">
+            <a class="nav-link nav-pill-custom" href="{{ route('user.dashboard') }}">
               <i class="bi bi-grid-fill me-1"></i> Daftar Vila
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link px-3 rounded-pill fw-semibold active bg-primary text-white" href="{{ route('user.my_bookings') }}">
+            <a class="nav-link nav-pill-custom active" href="{{ route('user.my_bookings') }}">
               <i class="bi bi-journal-check me-1"></i> Riwayat saya
             </a>
           </li>
         </ul>
 
         <div class="d-flex align-items-center gap-3 pt-2 pt-lg-0 border-top border-lg-0 border-light mt-2 mt-lg-0">
-          <div class="d-flex align-items-center bg-light border rounded-pill px-3 py-1 shadow-sm">
-            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2 fw-semibold" style="width: 28px; height: 28px; font-size: 0.85rem;">
+          <a href="{{ route('settings.index') }}" class="user-profile-badge d-flex align-items-center text-decoration-none" title="Buka Pengaturan Akun">
+            <div class="user-avatar me-2">
               {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
             </div>
-            <span class="fw-semibold text-dark small">{{ Auth::user()->name }}</span>
-          </div>
+            <span class="fw-semibold text-dark small pe-1">{{ Auth::user()->name }}</span>
+          </a>
 
           <form action="{{ route('logout') }}" method="POST" class="m-0">
             @csrf
-            <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3">
+            <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3 py-1 font-semibold d-flex align-items-center">
               <i class="bi bi-box-arrow-right me-1"></i> Logout
             </button>
           </form>
@@ -60,7 +71,7 @@
     <h4 class="fw-bold mb-3"><i class="bi bi-receipt me-2 text-primary"></i>Riwayat Reservasi & Pembayaran</h4>
 
     @if(session('success'))
-      <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+      <div class="alert alert-success border-0 shadow-sm alert-dismissible fade show mb-4" role="alert">
         <i class="bi bi-check-circle-fill me-2"></i>{{ session('success') }}
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
       </div>
@@ -112,16 +123,31 @@
                     @elseif($booking->payment_proof)
                       <span class="badge bg-info text-dark mb-1 d-inline-block"><i class="bi bi-clock-history me-1"></i>Menunggu Verifikasi</span>
                       <small class="d-block text-muted">via {{ $booking->payment_method ?? 'Transfer' }}</small>
+                    @elseif($booking->status == 'cancelled')
+                      <span class="badge bg-secondary">Dibatalkan</span>
                     @else
                       <span class="badge bg-secondary">Belum Lunas</span>
                     @endif
                   </td>
                   <td class="text-end">
-                    <button type="button" class="btn btn-sm {{ in_array($booking->status, ['confirmed', 'completed']) ? 'btn-outline-success' : ($booking->payment_proof ? 'btn-outline-primary' : 'btn-primary') }}" data-bs-toggle="modal" data-bs-target="#payModal{{ $booking->id }}">
-                      <i class="bi {{ $booking->payment_proof ? 'bi-receipt' : 'bi-wallet2' }} me-1"></i> 
-                      {{ in_array($booking->status, ['confirmed', 'completed']) ? 'Detail Pembayaran' : ($booking->payment_proof ? 'Lihat / Ganti Bukti' : 'Instruksi & Upload Bayar') }}
-                    </button>
+                    <div class="d-flex justify-content-end gap-1">
+                      <button type="button" class="btn btn-sm {{ in_array($booking->status, ['confirmed', 'completed']) ? 'btn-outline-success' : ($booking->payment_proof ? 'btn-outline-primary' : 'btn-primary') }}" data-bs-toggle="modal" data-bs-target="#payModal{{ $booking->id }}">
+                        <i class="bi {{ $booking->payment_proof ? 'bi-receipt' : 'bi-wallet2' }} me-1"></i> 
+                        {{ in_array($booking->status, ['confirmed', 'completed']) ? 'Detail' : ($booking->payment_proof ? 'Lihat/Ganti' : 'Bayar') }}
+                      </button>
 
+                      @if($booking->status == 'pending')
+                        <form action="{{ route('user.cancel_booking', $booking->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan pesanan ini?')">
+                          @csrf
+                          @method('PATCH')
+                          <button type="submit" class="btn btn-sm btn-outline-danger" title="Batalkan Pesanan">
+                            <i class="bi bi-x-circle"></i> Batal
+                          </button>
+                        </form>
+                      @endif
+                    </div>
+
+                    <!-- Modal Pembayaran -->
                     <div class="modal fade text-start" id="payModal{{ $booking->id }}" tabindex="-1" aria-hidden="true">
                       <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
@@ -138,6 +164,11 @@
                                   <i class="bi bi-check-circle-fill fs-2 d-block mb-1"></i>
                                   <strong class="d-block fs-6">Pembayaran Telah Diverifikasi & Lunas!</strong>
                                   <small>Terima kasih, reservasi Anda telah terkonfirmasi oleh Admin VilaGo.</small>
+                                </div>
+                              @elseif($booking->status == 'cancelled')
+                                <div class="alert alert-danger text-center mb-3">
+                                  <i class="bi bi-x-circle-fill fs-2 d-block mb-1"></i>
+                                  <strong class="d-block fs-6">Reservasi Ini Telah Dibatalkan</strong>
                                 </div>
                               @else
                                 <div class="alert alert-info small mb-3">
@@ -156,7 +187,7 @@
                                 </div>
                               @endif
 
-                              @if(!in_array($booking->status, ['confirmed', 'completed']))
+                              @if(!in_array($booking->status, ['confirmed', 'completed', 'cancelled']))
                                 <div class="mb-3">
                                   <label class="form-label fw-semibold">Pilih Bank Transfer</label>
                                   <select name="payment_method" class="form-select" required>
@@ -176,7 +207,7 @@
                             </div>
                             <div class="modal-footer">
                               <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Tutup</button>
-                              @if(!in_array($booking->status, ['confirmed', 'completed']))
+                              @if(!in_array($booking->status, ['confirmed', 'completed', 'cancelled']))
                                 <button type="submit" class="btn btn-primary btn-sm">
                                   <i class="bi bi-upload me-1"></i> Kirim Bukti Pembayaran
                                 </button>

@@ -28,6 +28,7 @@ Route::middleware(['auth'])->group(function () {
     // Riwayat Pemesanan & Upload Pembayaran Pelanggan
     Route::get('/my-bookings', [BookingController::class, 'myBookings'])->name('user.my_bookings');
     Route::post('/my-bookings/{id}/upload-payment', [BookingController::class, 'uploadPayment'])->name('user.upload_payment');
+    Route::patch('/my-bookings/{id}/cancel', [BookingController::class, 'cancel'])->name('user.cancel_booking');
 
     // Tamu Membuat Booking
     Route::get('/bookings/create', [BookingController::class, 'create'])->name('bookings.create');

@@ -9,10 +9,16 @@ class ReportController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Booking::with('villa')->where('status', 'completed');
+        // Mengikutsertakan relasi 'villa' dan 'user' agar data laporan lengkap
+        $query = Booking::with(['villa', 'user'])->where('status', 'completed');
 
         // Filter berdasarkan rentang tanggal check-in
         if ($request->filled('start_date') && $request->filled('end_date')) {
+            $request->validate([
+                'start_date' => 'nullable|date',
+                'end_date'   => 'nullable|date|after_or_equal:start_date',
+            ]);
+
             $query->whereBetween('check_in', [$request->start_date, $request->end_date]);
         }
 
