@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Booking;
 use App\Models\Villa;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class BookingController extends Controller
 {
@@ -12,15 +13,13 @@ class BookingController extends Controller
     {
         $query = Booking::with('villa');
 
-        // Filter berdasarkan pencarian nama tamu atau nomor HP
         if ($request->filled('search')) {
             $query->where(function($q) use ($request) {
                 $q->where('customer_name', 'like', '%' . $request->search . '%')
-                ->orWhere('customer_phone', 'like', '%' . $request->search . '%');
+                  ->orWhere('customer_phone', 'like', '%' . $request->search . '%');
             });
         }
 
-        // Filter berdasarkan status reservasi
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
@@ -36,28 +35,27 @@ class BookingController extends Controller
         return view('bookings.create', compact('villas'));
     }
 
-    // 1. Simpan Pemesanan (Otomatis mencatat ID Akun Login)
     public function store(Request $request)
     {
         $request->validate([
             'villa_id'       => 'required|exists:villas,id',
-            'customer_name'  => 'required|string|max:255', // Bebas diisi nama siapapun
+            'customer_name'  => 'required|string|max:255',
             'customer_phone' => 'required|string|max:20',
             'check_in'       => 'required|date',
             'check_out'      => 'required|date|after:check_in',
         ]);
 
-        $villa = \App\Models\Villa::findOrFail($request->villa_id);
+        $villa = Villa::findOrFail($request->villa_id);
 
-        $checkIn = \Carbon\Carbon::parse($request->check_in);
-        $checkOut = \Carbon\Carbon::parse($request->check_out);
+        $checkIn = Carbon::parse($request->check_in);
+        $checkOut = Carbon::parse($request->check_out);
         $nights = $checkIn->diffInDays($checkOut);
         $totalPrice = $nights * $villa->price_per_night;
 
-        \App\Models\Booking::create([
-            'user_id'        => auth()->id(), // Otomatis mengunci reservasi ke akun yang sedang login
+        Booking::create([
+            'user_id'        => auth()->id(),
             'villa_id'       => $villa->id,
-            'customer_name'  => $request->customer_name, // Nama tamu yang menginap
+            'customer_name'  => $request->customer_name,
             'customer_phone' => $request->customer_phone,
             'check_in'       => $request->check_in,
             'check_out'      => $request->check_out,
@@ -72,7 +70,6 @@ class BookingController extends Controller
         return redirect()->route('user.my_bookings')->with('success', 'Pemesanan berhasil! Silakan unggah bukti transfer pembayaran.');
     }
 
-    // Method edit() yang tadi hilang
     public function edit(Booking $booking)
     {
         $villas = Villa::all();
@@ -93,6 +90,12 @@ class BookingController extends Controller
 
         $booking->update($request->all());
 
+        if (in_array($request->status, ['completed', 'cancelled'])) {
+            $booking->villa->update(['status' => 'available']);
+        } elseif ($request->status === 'confirmed') {
+            $booking->villa->update(['status' => 'booked']);
+        }
+
         return redirect()->route('bookings.index')->with('success', 'Data reservasi berhasil diperbarui!');
     }
 
@@ -108,27 +111,21 @@ class BookingController extends Controller
             'status' => 'required|in:pending,confirmed,completed,cancelled',
         ]);
 
-        $booking = \App\Models\Booking::findOrFail($id);
+        $booking = Booking::findOrFail($id);
         $booking->update(['status' => $request->status]);
 
-        // Jika pesanan selesai (completed) atau dibatalkan (cancelled),
-        // kembalikan status unit vila menjadi 'available'
         if (in_array($request->status, ['completed', 'cancelled'])) {
             $booking->villa->update(['status' => 'available']);
-        } 
-        // Jika pesanan terkonfirmasi (confirmed), set status vila menjadi 'booked'
-        elseif ($request->status === 'confirmed') {
+        } elseif ($request->status === 'confirmed') {
             $booking->villa->update(['status' => 'booked']);
         }
 
         return back()->with('success', 'Status reservasi dan ketersediaan vila berhasil diperbarui!');
     }
 
-    // 2. Tampilkan Riwayat Pemesanan Khusus Akun Tersebut
     public function myBookings()
     {
-        // Hanya mengambil data reservasi milik akun yang sedang login
-        $bookings = \App\Models\Booking::with('villa')
+        $bookings = Booking::with('villa')
             ->where('user_id', auth()->id())
             ->latest()
             ->get();
@@ -136,12 +133,11 @@ class BookingController extends Controller
         return view('user.my_bookings', compact('bookings'));
     }
 
-    // Proses Upload Bukti Pembayaran
     public function uploadPayment(Request $request, $id)
     {
         $request->validate([
             'payment_method' => 'required|string',
-            'payment_proof'  => 'required|image|mimes:jpeg,jpg,png,webp|max:5120', // Maksimal 5MB
+            'payment_proof'  => 'required|image|mimes:jpeg,jpg,png,webp|max:5120',
         ], [
             'payment_proof.required' => 'File bukti pembayaran wajib diunggah.',
             'payment_proof.image'    => 'File harus berupa gambar.',
@@ -149,22 +145,19 @@ class BookingController extends Controller
             'payment_proof.max'      => 'Ukuran file gambar maksimal 5MB.',
         ]);
 
-        $booking = \App\Models\Booking::findOrFail($id);
+        $booking = Booking::findOrFail($id);
 
         if ($request->hasFile('payment_proof')) {
             $file = $request->file('payment_proof');
             $fileName = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
             
-            // Pastikan direktori folder tersedia
             $destinationPath = public_path('assets/images/payments');
             if (!file_exists($destinationPath)) {
                 mkdir($destinationPath, 0777, true);
             }
 
-            // Pindahkan file ke folder public/assets/images/payments
             $file->move($destinationPath, $fileName);
             
-            // Update data booking
             $booking->update([
                 'payment_proof'  => $fileName,
                 'payment_method' => $request->payment_method,
@@ -176,11 +169,27 @@ class BookingController extends Controller
 
     public function cancel($id)
     {
-        $booking = \App\Models\Booking::where('user_id', auth()->id())
-            ->where('status', 'pending')
-            ->findOrFail($id);
+        $booking = Booking::where('user_id', auth()->id())->findOrFail($id);
 
+        if ($booking->status === 'cancelled') {
+            return back()->with('error', 'Reservasi ini sudah dibatalkan sebelumnya.');
+        }
+
+        // Jika pesanan sudah terkonfirmasi, terapkan batas waktu pembatalan H-1 (minimal 24 jam sebelum check-in)
+        if ($booking->status === 'confirmed') {
+            $checkInDate = Carbon::parse($booking->check_in);
+            $now = Carbon::now();
+
+            if ($now->diffInHours($checkInDate, false) < 24) {
+                return back()->with('error', 'Pembatalan gagal. Pesanan yang sudah dikonfirmasi hanya dapat dibatalkan maksimal H-1 (24 jam sebelum check-in).');
+            }
+        }
+
+        // Update status pembatalan & kembalikan status vila ke 'available'
         $booking->update(['status' => 'cancelled']);
+        if ($booking->villa) {
+            $booking->villa->update(['status' => 'available']);
+        }
 
         return back()->with('success', 'Reservasi berhasil dibatalkan.');
     }

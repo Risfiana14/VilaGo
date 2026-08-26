@@ -77,6 +77,13 @@
       </div>
     @endif
 
+    @if(session('error'))
+      <div class="alert alert-danger border-0 shadow-sm alert-dismissible fade show mb-4" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ session('error') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    @endif
+
     <div class="card border-0 shadow-sm rounded-3">
       <div class="card-body p-0">
         <div class="table-responsive">
@@ -115,7 +122,13 @@
                     @endif
                   </td>
                   <td>
-                    @if(in_array($booking->status, ['confirmed', 'completed']))
+                    <!-- Logika Tampilan Status Pembayaran -->
+                    @if($booking->status == 'cancelled')
+                      <span class="badge bg-danger text-white mb-1 d-inline-block"><i class="bi bi-x-circle-fill me-1"></i>Dibatalkan</span>
+                      @if($booking->payment_proof)
+                        <small class="d-block text-muted">Proses Refund / Batal</small>
+                      @endif
+                    @elseif(in_array($booking->status, ['confirmed', 'completed']))
                       <span class="badge bg-success text-white mb-1 d-inline-block"><i class="bi bi-patch-check-fill me-1"></i>Lunas</span>
                       @if($booking->payment_method)
                         <small class="d-block text-muted">via {{ $booking->payment_method }}</small>
@@ -123,31 +136,37 @@
                     @elseif($booking->payment_proof)
                       <span class="badge bg-info text-dark mb-1 d-inline-block"><i class="bi bi-clock-history me-1"></i>Menunggu Verifikasi</span>
                       <small class="d-block text-muted">via {{ $booking->payment_method ?? 'Transfer' }}</small>
-                    @elseif($booking->status == 'cancelled')
-                      <span class="badge bg-secondary">Dibatalkan</span>
                     @else
                       <span class="badge bg-secondary">Belum Lunas</span>
                     @endif
                   </td>
                   <td class="text-end">
                     <div class="d-flex justify-content-end gap-1">
+                      <!-- Tombol Bayar / Detail -->
                       <button type="button" class="btn btn-sm {{ in_array($booking->status, ['confirmed', 'completed']) ? 'btn-outline-success' : ($booking->payment_proof ? 'btn-outline-primary' : 'btn-primary') }}" data-bs-toggle="modal" data-bs-target="#payModal{{ $booking->id }}">
                         <i class="bi {{ $booking->payment_proof ? 'bi-receipt' : 'bi-wallet2' }} me-1"></i> 
                         {{ in_array($booking->status, ['confirmed', 'completed']) ? 'Detail' : ($booking->payment_proof ? 'Lihat/Ganti' : 'Bayar') }}
                       </button>
 
-                      @if($booking->status == 'pending')
+                      <!-- Logika Penampilan Tombol Batal -->
+                      @php
+                        $checkInHours = \Carbon\Carbon::now()->diffInHours(\Carbon\Carbon::parse($booking->check_in), false);
+                        $isPending = $booking->status === 'pending';
+                        $isConfirmedH1 = ($booking->status === 'confirmed') && ($checkInHours >= 24);
+                      @endphp
+
+                      @if($isPending || $isConfirmedH1)
                         <form action="{{ route('user.cancel_booking', $booking->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan pesanan ini?')">
                           @csrf
                           @method('PATCH')
                           <button type="submit" class="btn btn-sm btn-outline-danger" title="Batalkan Pesanan">
-                            <i class="bi bi-x-circle"></i> Batal
+                            <i class="bi bi-x-circle me-1"></i> Batal
                           </button>
                         </form>
                       @endif
                     </div>
 
-                    <!-- Modal Pembayaran -->
+                    <!-- Modal Pembayaran / Detail -->
                     <div class="modal fade text-start" id="payModal{{ $booking->id }}" tabindex="-1" aria-hidden="true">
                       <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
@@ -159,16 +178,17 @@
                           <form action="{{ route('user.upload_payment', $booking->id) }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             <div class="modal-body">
-                              @if(in_array($booking->status, ['confirmed', 'completed']))
+                              @if($booking->status == 'cancelled')
+                                <div class="alert alert-danger text-center mb-3">
+                                  <i class="bi bi-x-circle-fill fs-2 d-block mb-1"></i>
+                                  <strong class="d-block fs-6">Reservasi Ini Telah Dibatalkan</strong>
+                                  <small>Apabila dana sudah terlanjur dikirim, tim VilaGo akan segera memproses pengembalian dana ke rekening Anda.</small>
+                                </div>
+                              @elseif(in_array($booking->status, ['confirmed', 'completed']))
                                 <div class="alert alert-success text-center mb-3">
                                   <i class="bi bi-check-circle-fill fs-2 d-block mb-1"></i>
                                   <strong class="d-block fs-6">Pembayaran Telah Diverifikasi & Lunas!</strong>
                                   <small>Terima kasih, reservasi Anda telah terkonfirmasi oleh Admin VilaGo.</small>
-                                </div>
-                              @elseif($booking->status == 'cancelled')
-                                <div class="alert alert-danger text-center mb-3">
-                                  <i class="bi bi-x-circle-fill fs-2 d-block mb-1"></i>
-                                  <strong class="d-block fs-6">Reservasi Ini Telah Dibatalkan</strong>
                                 </div>
                               @else
                                 <div class="alert alert-info small mb-3">
