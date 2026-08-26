@@ -10,6 +10,9 @@
   <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.min.css') }}">
   <link rel="stylesheet" href="{{ asset('assets/vendors/bootstrap-icons/bootstrap-icons.css') }}">
   <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
+  
+  <!-- CDN Chart.js untuk Grafik Penjualan Interaktif -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
@@ -111,8 +114,8 @@
                 <span class="profile-name d-none d-sm-inline">Admin VilaGo</span>              
               </button>
               <ul class="dropdown-menu dropdown-menu-end">
-                <li><a class="dropdown-item" href="#">Profil Saya</a></li>
-                <li><a class="dropdown-item" href="#">Pengaturan Akun</a></li>
+                <li><a class="dropdown-item" href="{{ route('settings.index') }}">Profil Saya</a></li>
+                <li><a class="dropdown-item" href="{{ route('settings.index') }}">Pengaturan Akun</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li>
                   <form action="{{ route('logout') }}" method="POST" class="d-inline">
@@ -149,8 +152,8 @@
               </div>
             </div>
             <div class="heading-actions">
-              <button class="btn btn-outline-secondary btn-sm" type="button"><i class="bi bi-download" aria-hidden="true"></i> Ekspor Data</button>
-              <button class="btn btn-primary btn-sm" type="button"><i class="bi bi-file-earmark-plus" aria-hidden="true"></i> Buat Laporan</button>
+              <a href="{{ route('reports.index') }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-download" aria-hidden="true"></i> Ekspor Data</a>
+              <a href="{{ route('reports.index') }}" class="btn btn-primary btn-sm"><i class="bi bi-file-earmark-plus" aria-hidden="true"></i> Buat Laporan</a>
             </div>
           </div>
 
@@ -209,50 +212,45 @@
             </div>
           </section>
 
-          <!-- Section Grafik dan Aktivitas -->
+          <!-- Section Grafik dan Aktivitas Terbaru -->
           <section class="row g-3 mt-1">
             <div class="col-12 col-xl-8">
-              <div class="panel">
-                <div class="panel-header">
+              <div class="panel p-4 bg-white rounded shadow-sm border">
+                <div class="panel-header d-flex justify-content-between align-items-center mb-3">
                   <div>
-                    <h2 class="h5 mb-1 section-title"><i class="bi bi-graph-up-arrow" aria-hidden="true"></i><span>Grafik Penjualan</span></h2>
-                    <p class="text-muted mb-0">Statistik pendapatan sewa bulanan tahun ini.</p>
+                    <h2 class="h5 mb-1 section-title"><i class="bi bi-graph-up-arrow me-2 text-primary" aria-hidden="true"></i><span>Grafik Penjualan Bulanan</span></h2>
+                    <p class="text-muted small mb-0">Statistik pendapatan sewa berdasarkan transaksi lunas tahun 2026.</p>
                   </div>
-                  <a class="btn btn-light btn-sm" href="#">Lihat Rincian</a>
+                  <a class="btn btn-light btn-sm text-primary fw-semibold" href="{{ route('reports.index') }}">Lihat Rincian</a>
                 </div>
 
-                <div class="chart-bars" aria-label="Sales performance chart">
-                  <div class="chart-column bar-42"><span></span><small>Jan</small></div>
-                  <div class="chart-column bar-58"><span></span><small>Feb</small></div>
-                  <div class="chart-column bar-51"><span></span><small>Mar</small></div>
-                  <div class="chart-column bar-72"><span></span><small>Apr</small></div>
-                  <div class="chart-column bar-66"><span></span><small>Mei</small></div>
-                  <div class="chart-column bar-83"><span></span><small>Jun</small></div>
+                <!-- Canvas Chart.js -->
+                <div style="position: relative; height: 280px;">
+                  <canvas id="salesChart"></canvas>
                 </div>
               </div>
             </div>
 
             <div class="col-12 col-xl-4">
-              <div class="panel h-100">
-                <div class="panel-header">
+              <div class="panel h-100 p-4 bg-white rounded shadow-sm border">
+                <div class="panel-header mb-3">
                   <div>
-                    <h2 class="h5 mb-1 section-title"><i class="bi bi-activity" aria-hidden="true"></i><span>Aktivitas Terbaru</span></h2>
-                    <p class="text-muted mb-0">Pembaruan operasional sistem.</p>
+                    <h2 class="h5 mb-1 section-title"><i class="bi bi-activity me-2 text-primary" aria-hidden="true"></i><span>Aktivitas Terbaru</span></h2>
+                    <p class="text-muted small mb-0">Pembaruan operasional sistem.</p>
                   </div>
                 </div>
 
-                <div class="activity-list">
-                  <div class="activity-item"><span class="activity-dot bg-primary"></span><div><p class="mb-1 fw-semibold">Vila Baru Didaftarkan</p><p class="text-muted small mb-0">Data vila berhasil ditambahkan ke database.</p></div></div>
-                  <div class="activity-item"><span class="activity-dot bg-success"></span><div><p class="mb-1 fw-semibold">Pembayaran Lunas</p><p class="text-muted small mb-0">Transaksi reservasi terverifikasi.</p></div></div>
-                  <div class="activity-item"><span class="activity-dot bg-warning"></span><div><p class="mb-1 fw-semibold">Permintaan Check-out</p><p class="text-muted small mb-0">Tamu melakukan proses check-out.</p></div></div>
+                <div class="activity-list d-flex flex-column gap-3">
+                  <div class="activity-item d-flex gap-2"><span class="activity-dot bg-primary mt-1" style="width: 10px; height: 10px; border-radius: 50%;"></span><div><p class="mb-0 fw-semibold small">Vila Baru Didaftarkan</p><p class="text-muted small mb-0">Data vila berhasil ditambahkan ke database.</p></div></div>
+                  <div class="activity-item d-flex gap-2"><span class="activity-dot bg-success mt-1" style="width: 10px; height: 10px; border-radius: 50%;"></span><div><p class="mb-0 fw-semibold small">Pembayaran Lunas</p><p class="text-muted small mb-0">Transaksi reservasi terverifikasi oleh Admin.</p></div></div>
+                  <div class="activity-item d-flex gap-2"><span class="activity-dot bg-warning mt-1" style="width: 10px; height: 10px; border-radius: 50%;"></span><div><p class="mb-0 fw-semibold small">Permintaan Check-out</p><p class="text-muted small mb-0">Tamu melakukan proses check-out.</p></div></div>
                 </div>
               </div>
             </div>
           </section>
 
-          <div class="row g-2 mb-3">
           <!-- Section Tabel Daftar Vila -->
-          <section class="panel mt-3">
+          <section class="panel mt-4 p-4 bg-white rounded shadow-sm border">
             <div class="row g-2 mb-3">
               <div class="col-md-8">
                 <form action="{{ route('home') }}" method="GET" class="d-flex gap-2">
@@ -273,18 +271,19 @@
               </div>
             </div>
 
-            <div class="panel-header d-flex justify-content-between align-items-center">
+            <div class="panel-header d-flex justify-content-between align-items-center mb-3">
               <div>
-                <h2 class="h5 mb-1 section-title"><i class="bi bi-building" aria-hidden="true"></i><span>Daftar Vila Terdaftar</span></h2>
-                <p class="text-muted mb-0">Data vila yang tersedia dalam database VilaGo.</p>
+                <h2 class="h5 mb-1 section-title"><i class="bi bi-building me-2 text-primary" aria-hidden="true"></i><span>Daftar Vila Terdaftar</span></h2>
+                <p class="text-muted small mb-0">Data vila yang tersedia dalam database VilaGo.</p>
               </div>
               <a class="btn btn-primary btn-sm" href="{{ route('villas.create') }}">
                 <i class="bi bi-plus-lg me-1"></i> Tambah Vila Baru
               </a>
             </div>
+            
             <div class="table-responsive">
               <table class="table align-middle mb-0">
-                <thead>
+                <thead class="table-light">
                   <tr>
                     <th scope="col">Nama Vila</th>
                     <th scope="col">Lokasi</th>
@@ -358,5 +357,54 @@
   <!-- JS Asset Laravel Helper -->
   <script src="{{ asset('assets/js/bootstrap.bundle.min.js') }}"></script>
   <script src="{{ asset('assets/js/main.js') }}"></script>
+
+  <!-- Penyiapan Data Grafik via PHP Blade -->
+  @php
+    // Jika belum ada data dari controller, default-kan seluruh bulan menjadi 0
+    $chartData = isset($monthlyRevenue) ? $monthlyRevenue : array_fill(0, 12, 0);
+  @endphp
+
+  <!-- Script Inisialisasi Grafik Chart.js -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const ctx = document.getElementById('salesChart').getContext('2d');
+      const monthlyData = @json($chartData);
+
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
+          datasets: [{
+            label: 'Pendapatan (Rp)',
+            data: monthlyData,
+            borderColor: '#0d6efd',
+            backgroundColor: 'rgba(13, 110, 253, 0.08)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.35,
+            pointBackgroundColor: '#0d6efd',
+            pointRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: function(value) {
+                  return 'Rp ' + (value / 1000000) + ' Jt';
+                }
+              }
+            }
+          }
+        }
+      });
+    });
+  </script>
 </body>
 </html>

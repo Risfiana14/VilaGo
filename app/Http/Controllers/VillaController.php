@@ -17,7 +17,7 @@ class VillaController extends Controller
         if ($request->filled('search')) {
             $query->where(function($q) use ($request) {
                 $q->where('title', 'like', '%' . $request->search . '%')
-                  ->orWhere('location', 'like', '%' . $request->search . '%');
+                ->orWhere('location', 'like', '%' . $request->search . '%');
             });
         }
 
@@ -32,7 +32,23 @@ class VillaController extends Controller
         $activeBookings = Booking::whereIn('status', ['pending', 'confirmed'])->count();
         $totalRevenue = Booking::where('status', 'completed')->sum('total_price');
 
-        return view('welcome', compact('villas', 'totalVillas', 'availableVillas', 'activeBookings', 'totalRevenue'));
+        // Menghitung pendapatan bulanan riil dari database (hanya status 'completed')
+        $monthlyRevenue = [];
+        for ($month = 1; $month <= 12; $month++) {
+            $monthlyRevenue[] = Booking::where('status', 'completed')
+                ->whereYear('created_at', date('Y'))
+                ->whereMonth('created_at', $month)
+                ->sum('total_price');
+        }
+
+        return view('welcome', compact(
+            'villas', 
+            'totalVillas', 
+            'availableVillas', 
+            'activeBookings', 
+            'totalRevenue', 
+            'monthlyRevenue'
+        ));
     }
 
     public function create()
